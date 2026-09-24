@@ -124,6 +124,13 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
 .subchart .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--ink2)}
 .subchart .seg button{min-height:30px;padding:4px 12px;font-size:13px}
 .subchart .box{position:relative;height:230px;margin-top:6px}
+.sitenav{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.sitenav-in{max-width:1320px;margin:0 auto;padding:10px 20px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:thin}
+.sitenav a{flex:0 0 auto;font-size:14px;font-weight:500;color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 14px;white-space:nowrap;background:var(--panel)}
+.sitenav a:hover{border-color:var(--blue);color:var(--blue)}
+.sitenav a.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.sitenav a:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+@media print{.sitenav{display:none}}
 .credit{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);text-align:center;font-size:13.5px;color:var(--ink2);line-height:1.7}
 .credit .c1{font-size:12.5px;letter-spacing:.2px}
 .credit .c2{font-size:15px;font-weight:600;color:var(--ink)}
@@ -172,6 +179,14 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
 </style>
 </head>
 <body>
+<nav class="sitenav" aria-label="เว็บไซต์วิเคราะห์ข้อมูล เขตสุขภาพที่ 1">
+  <div class="sitenav-in">
+    <a class="on" aria-current="page" href="https://drkulapol.github.io/planfin-analysis/">วิเคราะห์ Planfin เขต 1</a>
+    <a href="https://drkulapol.github.io/mishos-rh1/">วิเคราะห์รายรับรายกองทุน เขต 1</a>
+    <a href="https://drkulapol.github.io/quickmethod/dashboard.html">วิเคราะห์รายรับ-จ่ายทางบัญชี เขต 1</a>
+    <a href="https://cmi-rh1.github.io/cmi-rh1/#tab=overview&amp;h=11183">วิเคราะห์ CMI รายโรค/กลุ่ม AdjRW &lt; 0.5 เขต 1</a>
+  </div>
+</nav>
 <div class="wrap">
 <header>
   <h1>แผนทางการเงิน (Planfin) เขตสุขภาพที่ 1</h1>
