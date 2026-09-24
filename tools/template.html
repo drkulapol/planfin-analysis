@@ -314,6 +314,11 @@ const H=D.hosp; const HB={}; H.forEach(h=>HB[h.code]=h);
 const SIZE_ORDER=['A','S','M1','M2','F1','F2','F3'];
 const S={m:D.months.length-1,plan:'p2',thr:5,dir:'two',basis:'assess',mode:'filter',prov:'',size:'',grp:'',focus:null,picked:new Set(),tab:1,hosp:null,revCat:'REV',expCat:'EXP',by:'prov',sortRev:'dev',sortExp:'dev',t1sort:{k:'code',d:1},open:new Set(),openAcc:new Set(),subMode:'m'};
 const ACC=D.accs;
+/* P04 รายได้ UC ไม่นำมาประเมินในเดือนที่ 1–11 (ประเมินเมื่อครบ 12 เดือน) */
+const EXCL_UNTIL12=['P04'];
+const exclNow=c=>EXCL_UNTIL12.includes(c.id)&&D.months[S.m].n<12;
+CAT.forEach(c=>{const base=c.assess;Object.defineProperty(c,'assess',{get(){return base&&!exclNow(c);}});});
+const notAssessTxt=c=>exclNow(c)?'ไม่นำมาประเมินในเดือนที่ 1–11':'ไม่นำมาประเมิน';
 const $=id=>document.getElementById(id);
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
@@ -380,7 +385,7 @@ function seg(id,key,cb){$(id).addEventListener('click',e=>{const b=e.target.clos
   [...$(id).children].forEach(x=>x.classList.toggle('on',x===b));S[key]=b.dataset.v;(cb||render)();});}
 function initControls(){
   $('selMonth').innerHTML=D.months.map((m,i)=>`<option value="${i}"${i===S.m?' selected':''}>${m.fname} (${m.n} เดือน)</option>`).join('');
-  $('selMonth').onchange=e=>{S.m=+e.target.value;render();};
+  $('selMonth').onchange=e=>{S.m=+e.target.value;fillCatSelects();render();};
   $('inThr').oninput=e=>{const v=parseFloat(e.target.value);if(!isNaN(v)&&v>=0){S.thr=v;render();}};
   seg('segPlan','plan');seg('segDir','dir');seg('segBasis','basis',()=>{fillCatSelects();render();});
   seg('segMode','mode',()=>{$('pickWrap').classList.toggle('show',S.mode==='pick');if(S.mode==='pick'&&S.picked.size===0){filtered().forEach(h=>S.picked.add(h.code));renderPick();}render();});
@@ -559,9 +564,9 @@ function renderT2(){
   const h=HB[S.hosp];const o=overall(h);
   $('hInfo').innerHTML=`<span>จังหวัด <b>${esc(h.prov)}</b></span><span>ประเภท <b>${esc(h.type)} ${esc(h.lvl)}</b></span><span>กลุ่มบริการ <b>${esc(h.grp)}</b></span><span>เตียง <b>${h.bed??'–'}</b></span><span>ประชากร UC <b>${h.pop?h.pop.toLocaleString('th-TH'):'–'}</b></span>`;
   const vb=(t,v)=>`<div class="vbox"><div class="v1">${t}</div><div class="v2 t-${v.st}">${fP(v.dev)}</div><span class="pill s-${v.st}">${LBL[v.st]}</span> <span style="font-size:13px;color:var(--ink2)">${fM(v.A)} จากเป้า ${fM(v.T)} ลบ.</span></div>`;
-  const ni=o.r.A-o.e.A,niT=o.r.T-o.e.T;
+  let ni=0,niT=0;for(const i of REVI){ni+=h.a[i][S.m];niT+=h[S.plan][i]*frac(S.m);}for(const i of EXPI){ni-=h.a[i][S.m];niT-=h[S.plan][i]*frac(S.m);}
   $('hVerdict').innerHTML=vb('รายได้รวม',o.r)+vb('ค่าใช้จ่ายรวม',o.e)+
-    `<div class="vbox"><div class="v1">ภาพรวมแผน</div><div class="v2 ${o.st==='pass'?'t-pass':'t-high'}">${o.st==='pass'?'ผ่าน':'ไม่ผ่าน'}</div><span style="font-size:13px;color:var(--ink2)">ส่วนต่างรายได้หักค่าใช้จ่าย ${fM(ni)} ลบ. (แผน ${fM(niT)})</span></div>`;
+    `<div class="vbox"><div class="v1">ภาพรวมแผน</div><div class="v2 ${o.st==='pass'?'t-pass':'t-high'}">${o.st==='pass'?'ผ่าน':'ไม่ผ่าน'}</div><span style="font-size:13px;color:var(--ink2)">รายได้หักค่าใช้จ่าย (ทุกหมวด) ${fM(ni)} ลบ. (แผน ${fM(niT)})</span></div>`;
   // lines
   baseOpts();
   const ms=D.months.slice(0,S.m+1);
@@ -573,7 +578,7 @@ function renderT2(){
   line('chRevLine','REV',css('--rev'));line('chExpLine','EXP',css('--exp'));
   dpLegend();
   const block=(side,tot,title)=>{const idx=side==='rev'?REVI:EXPI;let s=dpHead('หมวด')+dpRow(title,S.basis==='assess'?'เฉพาะหมวดที่ประเมิน':'ทุกหมวด',evalv(h,tot),'total');
-    for(const i of idx){const v=evalv(h,CAT[i].id);const muted=!CAT[i].assess||(v.st==='none');s+=expRow(h,CAT[i].id,`${CAT[i].id} ${esc(CAT[i].name)}`,CAT[i].assess?'':'ไม่นำมาประเมิน',v,muted?'muted':'');}
+    for(const i of idx){const v=evalv(h,CAT[i].id);const muted=!CAT[i].assess||(v.st==='none');s+=expRow(h,CAT[i].id,`${CAT[i].id} ${esc(CAT[i].name)}`,CAT[i].assess?'':notAssessTxt(CAT[i]),v,muted?'muted':'');}
     return s;};
   $('dpRev').innerHTML=block('rev','REV','รวมรายได้');$('dpExp').innerHTML=block('exp','EXP','รวมค่าใช้จ่าย');
 }
@@ -628,7 +633,7 @@ function render(){
   drawSubCharts();
   $('footnote').innerHTML=`เป้าหมายสะสม = แผนประมาณการทั้งปี × ${m.n}/12 และ % คลาดเคลื่อน = (ผลจริงสะสม − เป้าหมายสะสม) ÷ เป้าหมายสะสม
   ผลจริงคำนวณจากงบทดลองสะสม (ยอดคงเหลือ Dr−Cr) จับคู่ผังบัญชีกับหมวด Planfin ตามตาราง AccCode ส่วนแผนมาจาก hig_est_current ที่ รพ. บันทึกรายบัญชี
-  ${S.basis==='assess'?'ยอดรวมใช้เฉพาะหมวดที่ประเมิน (ไม่รวมรายได้/ค่าใช้จ่ายที่ระบบบันทึกอัตโนมัติ รายได้งบลงทุน และค่าเสื่อมราคา) ตามนิยาม P291/P292':'ยอดรวมใช้ทุกหมวด ตามนิยาม P13S/P26S'}
+  ${S.basis==='assess'?'ยอดรวมใช้เฉพาะหมวดที่ประเมิน (ไม่รวมรายได้/ค่าใช้จ่ายที่ระบบบันทึกอัตโนมัติ รายได้งบลงทุน และค่าเสื่อมราคา) ตามนิยาม P291/P292'+(m.n<12?' และในเดือนที่ 1–11 ไม่นำ P04 รายได้ UC มาคิดในฝั่งรายได้':''):'ยอดรวมใช้ทุกหมวด ตามนิยาม P13S/P26S'}
   หมวดที่มีผลจริงแต่ไม่ได้ทำแผนนับเป็นไม่ผ่าน ส่วนหมวดที่ไม่มีทั้งแผนและผลไม่นำมาคิดร้อยละ
   ที่มาข้อมูล ${esc(D.src)} และกลุ่มบริการ ปีงบ 2569 (กบรส. มี.ค. 2569)`;
 }
@@ -641,7 +646,7 @@ function critText(){return S.dir==='two'?`อยู่ในช่วง ±${S.t
 function metaLines(){const m=D.months[S.m];const G=group();
   const flt=S.mode==='pick'?`เลือก รพ. เอง ${G.length} แห่ง`:[S.prov||'ทุกจังหวัด',S.size||'ทุกขนาด',S.grp||'ทุกกลุ่มบริการ'].join(' / ')+` (${G.length} แห่ง)`;
   return[`ปีงบประมาณ ${D.fy} ข้อมูลสะสม ${m.n} เดือน ถึง ${m.fname} เทียบ${S.plan==='p2'?'แผนปรับกลางปี':'แผนต้นปี'}`,
-    `กลุ่มเปรียบเทียบ: ${flt}`,`เกณฑ์ผ่าน: ${critText()} ยอดรวม${S.basis==='assess'?'เฉพาะหมวดที่ประเมิน (P291/P292)':'ทุกหมวด (P13S/P26S)'} หน่วยเงิน: ล้านบาท`];}
+    `กลุ่มเปรียบเทียบ: ${flt}`,`เกณฑ์ผ่าน: ${critText()} ยอดรวม${S.basis==='assess'?'เฉพาะหมวดที่ประเมิน (P291/P292)'+(m.n<12?' ไม่รวม P04 รายได้ UC ในเดือนที่ 1–11':''):'ทุกหมวด (P13S/P26S)'} หน่วยเงิน: ล้านบาท`];}
 const VH=['เป้าหมายสะสม','ผลจริงสะสม','% คลาดเคลื่อน','ต่างจากเป้า','สถานะ','ผลประเมิน'];
 const vcols=(v,assessed)=>[r2(v.T),r2(v.A),r1(v.dev),r2(v.A-v.T),LBL[v.st],mark(v,assessed)];
 function sortedAcc(h,cid){const L=accList(h,cid);const t=evalv(h,cid);const dir=(t.A-t.T)>=0?-1:1;return L.sort((p,q)=>dir*((p.v.A-p.v.T)-(q.v.A-q.v.T)));}
@@ -664,7 +669,7 @@ function buildExport(tab){
     for(const side of['rev','exp']){const tot=side==='rev'?'REV':'EXP';
       rows.push({c:'tot',r:[side==='rev'?'รวมรายได้':'รวมค่าใช้จ่าย','',...vcols(evalv(h,tot),true)]});
       for(const i of(side==='rev'?REVI:EXPI)){const c=CAT[i];const v=evalv(h,c.id);
-        rows.push({c:'cat',r:[`${c.id} ${c.name}`,c.assess?'':'ไม่นำมาประเมิน',...vcols(v,c.assess)]});
+        rows.push({c:'cat',r:[`${c.id} ${c.name}`,c.assess?'':notAssessTxt(c),...vcols(v,c.assess)]});
         for(const x of sortedAcc(h,c.id)){const row=[`${c.id} ${c.name}`,x.a.c,x.a.n,...vcols(x.v,c.assess)];acc.push(row);rows.push({c:'acc',r:[x.a.n,x.v.T<0||x.v.A<0?'บัญชีรายการหัก':'',...vcols(x.v,c.assess)]});}}}
     sheets.push({name:'รายหมวดและบัญชีย่อย',head:['หมวด / บัญชี','หมายเหตุ',...VH],rows:rows.map(x=>x.r),cls:rows.map(x=>x.c)});
     sheets.push({name:'บัญชีย่อย',head:['หมวด','รหัสบัญชี','ชื่อบัญชี',...VH],rows:acc,pdf:false});
