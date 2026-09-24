@@ -26,9 +26,23 @@ pmap = pd.concat([amap.rename(columns={'CodeL1':'acc','GroupID':'g','Account1':'
                     .rename(columns={'account_code':'acc','plan_code':'g','account_title':'nm'})]).drop_duplicates('acc')
 pm = pmap.set_index('acc')
 
+# รพ. บางแห่งแตกบัญชีย่อยเพิ่มหลักเอง เช่น 5104030205.10101, 5104030205.101.01
+# ให้รวมยอดกลับเข้าบัญชีมาตรฐานที่เป็นต้นทาง (บัญชีที่ยาวที่สุดที่เป็น prefix)
+KNOWN = sorted(pmap.acc.unique(), key=len, reverse=True)
+_pc = {}
+def parent(c):
+    if c in _pc: return _pc[c]
+    r = None
+    if c in pm.index: r = c
+    else:
+        for k in KNOWN:
+            if c.startswith(k) and re.fullmatch(r'[.\d]+', c[len(k):]): r = k; break
+    _pc[c] = r; return r
+
 # ผลจริงสะสม (ยอดคงเหลืองบทดลอง) รายบัญชี รายเดือน
-di = DataIn[DataIn.PDate > DataIn.PDate.min()]
-x = di.merge(pmap, left_on='AccCode', right_on='acc')
+di = DataIn[DataIn.PDate > DataIn.PDate.min()].copy()
+di['AccStd'] = di.AccCode.map(parent)
+x = di.merge(pmap, left_on='AccStd', right_on='acc')
 x['net'] = x.EndDr.fillna(0) - x.EndCr.fillna(0)
 x.loc[x.g.isin(REV), 'net'] *= -1
 months = sorted(x.PDate.unique())
