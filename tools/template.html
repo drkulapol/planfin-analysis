@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Planfin เขตสุขภาพที่ 1 ปีงบประมาณ 2569</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#EEF1F5; --panel:#FFFFFF; --ink:#1B2533; --ink2:#556275; --line:#D9DFE7; --soft:#F5F7FA;
+  --blue:#2B6CD4; --blue-soft:#E4EDFB;
+  --pass:#16865F; --pass-soft:#DDF2E9; --low:#C2410C; --low-soft:#FCE9DC; --high:#B42343; --high-soft:#F9DEE4;
+  --band:rgba(22,134,95,.14); --na:#98A2B3;
+  --rev:#2B6CD4; --exp:#8A4FBF;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12171F; --panel:#1A212C; --ink:#E6EBF2; --ink2:#9AA6B6; --line:#2C3644; --soft:#202938;
+  --blue:#5B93EA; --blue-soft:#1E2F4B; --pass:#3FBF8C; --pass-soft:#16362B; --low:#F08A4B; --low-soft:#3D2717; --high:#F0708A; --high-soft:#3E1E27;
+  --band:rgba(63,191,140,.16); --na:#6B7686; --rev:#5B93EA; --exp:#B084DE;}}
+:root[data-theme="dark"]{
+  --bg:#12171F; --panel:#1A212C; --ink:#E6EBF2; --ink2:#9AA6B6; --line:#2C3644; --soft:#202938;
+  --blue:#5B93EA; --blue-soft:#1E2F4B; --pass:#3FBF8C; --pass-soft:#16362B; --low:#F08A4B; --low-soft:#3D2717; --high:#F0708A; --high-soft:#3E1E27;
+  --band:rgba(63,191,140,.16); --na:#6B7686; --rev:#5B93EA; --exp:#B084DE;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","Sarabun","Leelawadee UI","Tahoma",sans-serif;font-size:15px;line-height:1.55;font-variant-numeric:tabular-nums}
+.wrap{max-width:1320px;margin:0 auto;padding:20px 20px 60px}
+header h1{font-size:24px;font-weight:700;margin:0;letter-spacing:-.2px}
+header p{margin:2px 0 0;color:var(--ink2);font-size:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.controls{margin-top:16px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld label{font-size:13px;color:var(--ink2)}
+select,input[type=text],input[type=number]{font:inherit;font-size:14px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-height:38px}
+input[type=number]{width:76px}
+select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{font:inherit;font-size:14px;border:0;background:transparent;color:var(--ink);padding:7px 14px;min-height:38px;cursor:pointer}
+.seg button.on{background:var(--blue);color:#fff}
+.divider{height:1px;background:var(--line)}
+.focusbox input{min-width:250px}
+.pickwrap{display:none;margin-top:4px}
+.pickwrap.show{display:block}
+.picklist{max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px 10px;columns:3 260px;column-gap:18px;font-size:14px}
+.picklist label{display:flex;gap:6px;align-items:center;break-inside:avoid;padding:2px 0;cursor:pointer}
+.picktools{display:flex;gap:10px;margin-bottom:6px;font-size:13px;align-items:center;flex-wrap:wrap}
+.linkbtn{font:inherit;font-size:13px;background:none;border:0;color:var(--blue);cursor:pointer;padding:0}
+.tabs{display:flex;gap:4px;margin:20px 0 0;border-bottom:2px solid var(--line);overflow-x:auto}
+.tabs button{font:inherit;font-size:15px;font-weight:500;border:0;background:none;color:var(--ink2);padding:10px 16px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--blue)}
+.tab{display:none;padding-top:18px}
+.tab.on{display:block}
+.grid{display:grid;gap:16px}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:1fr 1fr}
+@media (max-width:900px){.g3,.g2{grid-template-columns:1fr}}
+h2{font-size:17px;margin:0 0 4px;font-weight:600}
+.sub{color:var(--ink2);font-size:13px;margin:0 0 12px}
+.kpi .big{font-size:40px;font-weight:700;line-height:1.1}
+.kpi .big small{font-size:18px;font-weight:500;color:var(--ink2);margin-left:6px}
+.kpi .lab{font-size:15px;font-weight:600}
+.meter{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:12px 0 8px;background:var(--soft)}
+.meter span{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--ink2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.chartbox{position:relative;height:340px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{background:var(--soft);font-weight:600;font-size:13px;color:var(--ink2);position:sticky;top:0;cursor:pointer;user-select:none}
+th.l,td.l{text-align:left}
+tr.focus td{background:var(--blue-soft);font-weight:600}
+tr.focus td:first-child{box-shadow:inset 3px 0 0 var(--blue)}
+tbody tr:hover td{background:var(--soft)}
+tbody tr.focus:hover td{background:var(--blue-soft)}
+.pill{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12.5px;font-weight:600}
+.s-pass{color:var(--pass);background:var(--pass-soft)}
+.s-low{color:var(--low);background:var(--low-soft)}
+.s-high{color:var(--high);background:var(--high-soft)}
+.s-noplan{color:var(--high);background:var(--high-soft)}
+.s-none{color:var(--na);background:var(--soft)}
+.t-pass{color:var(--pass)} .t-low{color:var(--low)} .t-high{color:var(--high)} .t-noplan{color:var(--high)} .t-none{color:var(--na)}
+.clickable{cursor:pointer}
+/* dot plot */
+.dp{display:flex;flex-direction:column}
+.dp-head,.dp-row{display:grid;grid-template-columns:minmax(170px,1.3fr) minmax(200px,2fr) 92px 92px 76px 92px 76px;gap:10px;align-items:center;padding:6px 4px;border-bottom:1px solid var(--line)}
+.dp-head{font-size:12.5px;color:var(--ink2);border-bottom:1px solid var(--line);padding-top:0}
+.dp-head .scale{position:relative;height:18px}
+.dp-head .scale span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.dp-row .nm{font-size:14px;line-height:1.3;overflow:hidden;text-overflow:ellipsis}
+.dp-row .nm small{display:block;color:var(--ink2);font-size:12px}
+.dp-row.muted .nm,.dp-row.muted .num{color:var(--na)}
+.dp-row.total{background:var(--soft);font-weight:600}
+.dp-row.focus{background:var(--blue-soft);box-shadow:inset 3px 0 0 var(--blue)}
+.num{text-align:right;font-size:13.5px}
+.track{position:relative;height:24px}
+.track .axis{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--line)}
+.track .band{position:absolute;top:3px;bottom:3px;background:var(--band);border-radius:3px}
+.track .tgt{position:absolute;top:1px;bottom:1px;width:2px;background:var(--ink);transform:translateX(-1px)}
+.track .dot{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--panel)}
+.track .stem{position:absolute;top:50%;height:2px;transform:translateY(-1px);opacity:.55}
+.track .clip{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:12px;font-weight:700}
+.bg-pass{background:var(--pass)} .bg-low{background:var(--low)} .bg-high{background:var(--high)} .bg-noplan{background:var(--high)} .bg-none{background:var(--na)}
+@media (max-width:760px){.dp-head,.dp-row{grid-template-columns:1fr 60px 76px 68px;}.dp-head .h-t,.dp-head .h-a,.dp-row .c-t,.dp-row .c-a{display:none}.dp-head .h-n{display:none}.dp-row .nm{grid-column:1/-1}}
+.dp-row.exp{cursor:pointer}
+.dp-row.exp:hover{background:var(--soft)}
+.caret{display:inline-block;width:16px;color:var(--blue);font-weight:700;transition:transform .15s}
+.dp-row.open .caret{transform:rotate(90deg)}
+.dp-sub{margin:0 0 8px 14px;border-left:3px solid var(--blue);background:var(--soft);border-radius:0 8px 8px 0;padding:4px 6px 6px}
+.dp-sub .cap{font-size:13px;color:var(--ink2);padding:6px 4px 4px}
+.dp-sub .dp-row{border-bottom-color:var(--line)}
+.dp-sub .dp-row:last-child{border-bottom:0}
+.dp-sub .nm{font-size:13px}
+.heat td.cellx{cursor:pointer}
+.heat td.cellx:hover{outline:2px solid var(--blue);outline-offset:-2px}
+.subchart{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:4px 0 8px}
+.subchart.acc{margin:2px 4px 8px 18px;border-left:3px solid var(--line)}
+.subchart .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--ink2)}
+.subchart .seg button{min-height:30px;padding:4px 12px;font-size:13px}
+.subchart .box{position:relative;height:230px;margin-top:6px}
+.hinfo{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:14px;color:var(--ink2);margin-top:6px}
+.hinfo b{color:var(--ink);font-weight:600}
+.verdict{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.vbox{border:1px solid var(--line);border-radius:8px;padding:10px 14px;min-width:180px}
+.vbox .v1{font-size:13px;color:var(--ink2)} .vbox .v2{font-size:22px;font-weight:700}
+.heat td{text-align:center;font-size:12.5px;padding:5px 6px}
+.heat th{white-space:normal;min-width:74px;max-width:110px;font-size:12px;line-height:1.3;vertical-align:bottom;text-align:center}
+.heat th.l,.heat td.l{text-align:left;max-width:none;min-width:190px}
+.heat th.sel{background:var(--blue-soft);color:var(--ink)}
+.note{font-size:13px;color:var(--ink2);margin-top:14px;line-height:1.6}
+.catbar{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;margin-bottom:14px}
+.catbar select{min-width:320px;max-width:100%}
+.stats{display:flex;flex-wrap:wrap;gap:10px}
+.empty{padding:30px;text-align:center;color:var(--ink2)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>แผนทางการเงิน (Planfin) เขตสุขภาพที่ 1</h1>
+  <p id="hdrsub"></p>
+</header>
+
+<section class="panel controls" aria-label="ตัวเลือก">
+  <div class="row">
+    <div class="fld"><label for="selMonth">ข้อมูลสะสมถึงงวด</label><select id="selMonth"></select></div>
+    <div class="fld"><label>แผนที่ใช้เทียบ</label><div class="seg" id="segPlan"><button data-v="p2" class="on">แผนปรับกลางปี</button><button data-v="p1">แผนต้นปี</button></div></div>
+    <div class="fld"><label for="inThr">เกณฑ์ผ่าน (± %)</label><input id="inThr" type="number" min="0" max="100" step="0.5" value="5"></div>
+    <div class="fld"><label>ทิศทางเกณฑ์</label><div class="seg" id="segDir"><button data-v="two" class="on">เบี่ยงได้ทั้งสองทาง</button><button data-v="one">ทางเดียว</button></div></div>
+    <div class="fld"><label>ยอดรวมที่ใช้ประเมิน</label><div class="seg" id="segBasis"><button data-v="assess" class="on">เฉพาะหมวดที่ประเมิน</button><button data-v="all">ทุกหมวด</button></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="row">
+    <div class="fld"><label>กลุ่มเปรียบเทียบ</label><div class="seg" id="segMode"><button data-v="filter" class="on">ตามตัวกรอง</button><button data-v="pick">เลือก รพ. เอง</button></div></div>
+    <div class="fld"><label for="fProv">จังหวัด</label><select id="fProv"></select></div>
+    <div class="fld"><label for="fSize">ขนาด (A–F3)</label><select id="fSize"></select></div>
+    <div class="fld"><label for="fGrp">กลุ่มระดับบริการ (GroupName)</label><select id="fGrp"></select></div>
+    <div class="fld focusbox"><label for="inFocus">โฟกัส รพ. (ปักหมุดไว้บนสุด พร้อมกรอบ)</label>
+      <input id="inFocus" type="text" list="dlHosp" placeholder="พิมพ์รหัสสถานบริการหรือชื่อ รพ." autocomplete="off"><datalist id="dlHosp"></datalist></div>
+  </div>
+  <div class="pickwrap" id="pickWrap">
+    <div class="picktools"><span id="pickCount"></span><button class="linkbtn" id="pickAll">เลือกทั้งหมดตามตัวกรอง</button><button class="linkbtn" id="pickNone">ล้างที่เลือก</button><input type="text" id="pickSearch" placeholder="ค้นหาในรายการ" style="min-height:30px;padding:4px 8px"></div>
+    <div class="picklist" id="pickList"></div>
+  </div>
+</section>
+
+<nav class="tabs" role="tablist">
+  <button class="on" data-tab="1">ภาพรวมผลประเมิน</button>
+  <button data-tab="2">รายโรงพยาบาล</button>
+  <button data-tab="3">หมวดรายได้</button>
+  <button data-tab="4">หมวดค่าใช้จ่าย</button>
+</nav>
+
+<!-- TAB 1 -->
+<section class="tab on" id="tab1">
+  <div class="grid g3" id="kpis"></div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="panel">
+      <h2>ตำแหน่งของแต่ละ รพ. เทียบแผน</h2>
+      <p class="sub">แกนนอนคือ % คลาดเคลื่อนด้านรายได้ แกนตั้งคือด้านค่าใช้จ่าย กรอบสีเขียวคือช่วงที่ผ่านเกณฑ์</p>
+      <div class="chartbox"><canvas id="chScatter"></canvas></div>
+    </div>
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start">
+        <div><h2>อัตราผ่านเกณฑ์แยกกลุ่มย่อย</h2><p class="sub">ร้อยละของ รพ. ที่ผ่านในแต่ละด้าน</p></div>
+        <div class="seg" id="segBy"><button data-v="prov" class="on">จังหวัด</button><button data-v="lvl">ขนาด</button><button data-v="grp">กลุ่มบริการ</button></div>
+      </div>
+      <div class="chartbox"><canvas id="chBy"></canvas></div>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <h2>ผลประเมินราย รพ.</h2>
+    <p class="sub" id="t1sub"></p>
+    <div class="tbl" style="max-height:560px"><table id="tbl1"></table></div>
+  </div>
+</section>
+
+<!-- TAB 2 -->
+<section class="tab" id="tab2">
+  <div class="panel">
+    <div class="catbar" style="margin-bottom:4px">
+      <div class="fld"><label for="selHosp">โรงพยาบาล (จากกลุ่มเปรียบเทียบ)</label><select id="selHosp" style="min-width:340px"></select></div>
+    </div>
+    <div class="hinfo" id="hInfo"></div>
+    <div class="verdict" id="hVerdict"></div>
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="panel"><h2>รายได้สะสมเทียบเป้าหมาย</h2><p class="sub">เส้นประคือเป้าหมายสะสม (แผนทั้งปี × เดือนที่ผ่านไป ÷ 12)</p><div class="chartbox" style="height:260px"><canvas id="chRevLine"></canvas></div></div>
+    <div class="panel"><h2>ค่าใช้จ่ายสะสมเทียบเป้าหมาย</h2><p class="sub">เส้นประคือเป้าหมายสะสม (แผนทั้งปี × เดือนที่ผ่านไป ÷ 12)</p><div class="chartbox" style="height:260px"><canvas id="chExpLine"></canvas></div></div>
+  </div>
+  <div class="panel" style="margin-top:16px"><h2>รายได้ รายหมวด</h2><p class="sub dplegend"></p><div class="dp" id="dpRev"></div></div>
+  <div class="panel" style="margin-top:16px"><h2>ค่าใช้จ่าย รายหมวด</h2><p class="sub dplegend"></p><div class="dp" id="dpExp"></div></div>
+</section>
+
+<!-- TAB 3 -->
+<section class="tab" id="tab3">
+  <div class="panel">
+    <div class="catbar">
+      <div class="fld"><label for="selRevCat">หมวดรายได้</label><select id="selRevCat"></select></div>
+      <div class="fld"><label>เรียงตาม</label><div class="seg" id="segSortRev"><button data-v="dev" class="on">% คลาดเคลื่อน</button><button data-v="name">รหัส รพ.</button></div></div>
+    </div>
+    <div class="stats" id="stRev"></div>
+  </div>
+  <div class="panel" style="margin-top:16px"><h2 id="h3dp"></h2><p class="sub dplegend"></p><div class="dp" id="dpRevCat"></div></div>
+  <div class="panel" style="margin-top:16px"><h2>ทุกหมวดรายได้ในมุมเดียว</h2><p class="sub">ตัวเลขคือ % คลาดเคลื่อนจากเป้าหมาย สีบอกผลประเมิน คลิกหัวคอลัมน์เพื่อเลือกหมวด คลิกช่องตัวเลขเพื่อดูบัญชีย่อยของ รพ. นั้น</p><div class="tbl" style="max-height:600px"><table class="heat" id="heatRev"></table></div></div>
+</section>
+
+<!-- TAB 4 -->
+<section class="tab" id="tab4">
+  <div class="panel">
+    <div class="catbar">
+      <div class="fld"><label for="selExpCat">หมวดค่าใช้จ่าย</label><select id="selExpCat"></select></div>
+      <div class="fld"><label>เรียงตาม</label><div class="seg" id="segSortExp"><button data-v="dev" class="on">% คลาดเคลื่อน</button><button data-v="name">รหัส รพ.</button></div></div>
+    </div>
+    <div class="stats" id="stExp"></div>
+  </div>
+  <div class="panel" style="margin-top:16px"><h2 id="h4dp"></h2><p class="sub dplegend"></p><div class="dp" id="dpExpCat"></div></div>
+  <div class="panel" style="margin-top:16px"><h2>ทุกหมวดค่าใช้จ่ายในมุมเดียว</h2><p class="sub">ตัวเลขคือ % คลาดเคลื่อนจากเป้าหมาย สีบอกผลประเมิน คลิกหัวคอลัมน์เพื่อเลือกหมวด คลิกช่องตัวเลขเพื่อดูบัญชีย่อยของ รพ. นั้น</p><div class="tbl" style="max-height:600px"><table class="heat" id="heatExp"></table></div></div>
+</section>
+
+<p class="note" id="footnote"></p>
+</div>
+
+<script id="data" type="application/json">__DATA__</script>
+<script>
+(function(){
+const D=JSON.parse(document.getElementById('data').textContent);
+const CAT=D.cats, NC=CAT.length;
+const REVI=CAT.map((c,i)=>c.side==='rev'?i:-1).filter(i=>i>=0);
+const EXPI=CAT.map((c,i)=>c.side==='exp'?i:-1).filter(i=>i>=0);
+const H=D.hosp; const HB={}; H.forEach(h=>HB[h.code]=h);
+const SIZE_ORDER=['A','S','M1','M2','F1','F2','F3'];
+const S={m:D.months.length-1,plan:'p2',thr:5,dir:'two',basis:'assess',mode:'filter',prov:'',size:'',grp:'',focus:null,picked:new Set(),tab:1,hosp:null,revCat:'REV',expCat:'EXP',by:'prov',sortRev:'dev',sortExp:'dev',t1sort:{k:'code',d:1},open:new Set(),openAcc:new Set(),subMode:'m'};
+const ACC=D.accs;
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ---------- core calc ---------- */
+function catsFor(side){const idx=side==='rev'?REVI:EXPI;return S.basis==='assess'?idx.filter(i=>CAT[i].assess):idx;}
+function frac(m){return D.months[m].n/12;}
+function amt(h,key,m){ // returns {A,P}
+  if(m===undefined)m=S.m;
+  if(key==='REV'||key==='EXP'){let A=0,P=0;for(const i of catsFor(key==='REV'?'rev':'exp')){A+=h.a[i][m];P+=h[S.plan][i];}return{A,P};}
+  const i=CAT.findIndex(c=>c.id===key);return{A:h.a[i][m],P:h[S.plan][i]};
+}
+function sideOf(key){if(key==='REV')return'rev';if(key==='EXP')return'exp';return CAT.find(c=>c.id===key).side;}
+function evalv(h,key,m){
+  if(m===undefined)m=S.m;
+  const {A,P}=amt(h,key,m);return evalAT(A,P,m,sideOf(key));
+}
+function evalAT(A,P,m,side){const T=P*frac(m);
+  let dev=null,st;
+  if(Math.abs(T)<1){st=Math.abs(A)<1?'none':'noplan';}
+  else{dev=(A-T)/Math.abs(T)*100;const t=S.thr+1e-9;
+    if(S.dir==='two'){st=Math.abs(dev)<=t?'pass':(dev<0?'low':'high');}
+    else if(side==='rev'){st=dev>=-t?'pass':'low';}
+    else{st=dev<=t?'pass':'high';}}
+  return{A,T,P,dev,st,side};
+}
+const LBL={pass:'ผ่าน',low:'ต่ำกว่าแผน',high:'สูงกว่าแผน',noplan:'ไม่มีแผน',none:'ไม่มีแผน/ผล'};
+function isFail(st){return st==='low'||st==='high'||st==='noplan';}
+function overall(h){const r=evalv(h,'REV'),e=evalv(h,'EXP');let st;
+  if(r.st==='pass'&&e.st==='pass')st='pass';else st='fail';return{r,e,st};}
+
+/* ---------- formatting ---------- */
+const fM=v=>(v/1e6).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fP=v=>v===null?'–':(v>0?'+':'')+v.toLocaleString('th-TH',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+const pct=(a,b)=>b?(a/b*100):0;
+const f1=v=>v.toLocaleString('th-TH',{minimumFractionDigits:1,maximumFractionDigits:1});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const short=n=>n.replace(/^รพ\.\s*/,'รพ.');
+
+/* ---------- group ---------- */
+function filtered(except){return H.filter(h=>(except==='prov'||!S.prov||h.prov===S.prov)&&(except==='size'||!S.size||h.lvl===S.size)&&(except==='grp'||!S.grp||h.grp===S.grp));}
+function group(){let g=S.mode==='pick'?H.filter(h=>S.picked.has(h.code)):filtered();
+  if(S.focus&&!g.includes(HB[S.focus]))g=[HB[S.focus],...g];return g;}
+function pinFocus(arr,getH){if(!S.focus)return arr;const i=arr.findIndex(x=>getH(x).code===S.focus);if(i>0){const [f]=arr.splice(i,1);arr.unshift(f);}return arr;}
+
+/* ---------- controls ---------- */
+function fillSel(el,opts,val,allLabel){el.innerHTML=`<option value="">${allLabel}</option>`+opts.map(o=>`<option value="${esc(o.v)}"${o.v===val?' selected':''}>${esc(o.t)}</option>`).join('');}
+function refreshFilters(){
+  const count=(list,key)=>{const c={};list.forEach(h=>c[h[key]]=(c[h[key]]||0)+1);return c;};
+  let L=filtered('prov'),c=count(L,'prov');
+  fillSel($('fProv'),Object.keys(c).sort((a,b)=>a.localeCompare(b,'th')).map(k=>({v:k,t:`${k} (${c[k]})`})),S.prov,`ทุกจังหวัด (${L.length})`);
+  L=filtered('size');c=count(L,'lvl');
+  fillSel($('fSize'),SIZE_ORDER.filter(k=>c[k]).map(k=>({v:k,t:`${k} (${c[k]})`})),S.size,`ทุกขนาด (${L.length})`);
+  L=filtered('grp');c=count(L,'grp');
+  fillSel($('fGrp'),Object.keys(c).sort((a,b)=>a.localeCompare(b,'th')).map(k=>({v:k,t:`${k} (${c[k]})`})),S.grp,`ทุกกลุ่ม (${L.length})`);
+  renderPick();
+}
+function renderPick(){
+  const q=($('pickSearch').value||'').trim();
+  const L=filtered().filter(h=>!q||h.code.includes(q)||h.name.includes(q)||h.prov.includes(q));
+  $('pickList').innerHTML=L.map(h=>`<label><input type="checkbox" value="${h.code}"${S.picked.has(h.code)?' checked':''}> ${h.code} ${esc(short(h.name))} <span style="color:var(--ink2)">${esc(h.prov)}</span></label>`).join('');
+  $('pickCount').textContent=`เลือกแล้ว ${S.picked.size} แห่ง`;
+}
+function seg(id,key,cb){$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  [...$(id).children].forEach(x=>x.classList.toggle('on',x===b));S[key]=b.dataset.v;(cb||render)();});}
+function initControls(){
+  $('selMonth').innerHTML=D.months.map((m,i)=>`<option value="${i}"${i===S.m?' selected':''}>${m.fname} (${m.n} เดือน)</option>`).join('');
+  $('selMonth').onchange=e=>{S.m=+e.target.value;render();};
+  $('inThr').oninput=e=>{const v=parseFloat(e.target.value);if(!isNaN(v)&&v>=0){S.thr=v;render();}};
+  seg('segPlan','plan');seg('segDir','dir');seg('segBasis','basis',()=>{fillCatSelects();render();});
+  seg('segMode','mode',()=>{$('pickWrap').classList.toggle('show',S.mode==='pick');if(S.mode==='pick'&&S.picked.size===0){filtered().forEach(h=>S.picked.add(h.code));renderPick();}render();});
+  seg('segBy','by',renderT1);seg('segSortRev','sortRev',renderT3);seg('segSortExp','sortExp',renderT4);
+  $('fProv').onchange=e=>{S.prov=e.target.value;refreshFilters();render();};
+  $('fSize').onchange=e=>{S.size=e.target.value;refreshFilters();render();};
+  $('fGrp').onchange=e=>{S.grp=e.target.value;refreshFilters();render();};
+  $('dlHosp').innerHTML=H.map(h=>`<option value="${h.code} ${esc(short(h.name))}">`).join('');
+  $('inFocus').addEventListener('input',e=>{const v=e.target.value.trim();
+    if(!v){S.focus=null;render();return;}
+    const code=v.split(' ')[0];let h=HB[code];
+    if(!h){const m=H.filter(x=>x.name.includes(v)||x.code===v);if(m.length===1)h=m[0];}
+    if(h&&h.code!==S.focus){S.focus=h.code;S.hosp=h.code;render();}});
+  $('pickList').addEventListener('change',e=>{if(e.target.type!=='checkbox')return;if(e.target.checked)S.picked.add(e.target.value);else S.picked.delete(e.target.value);$('pickCount').textContent=`เลือกแล้ว ${S.picked.size} แห่ง`;render();});
+  $('pickAll').onclick=()=>{filtered().forEach(h=>S.picked.add(h.code));renderPick();render();};
+  $('pickNone').onclick=()=>{S.picked.clear();renderPick();render();};
+  $('pickSearch').oninput=renderPick;
+  document.querySelector('.tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;goTab(+b.dataset.tab);});
+  $('selHosp').onchange=e=>{S.hosp=e.target.value;renderT2();drawSubCharts();};
+  $('selRevCat').onchange=e=>{S.revCat=e.target.value;renderT3();};
+  $('selExpCat').onchange=e=>{S.expCat=e.target.value;renderT4();};
+  fillCatSelects();refreshFilters();
+}
+function goTab(n){S.tab=n;document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',+b.dataset.tab===n));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='tab'+n));render();}
+function fillCatSelects(){
+  const mk=(side,tot,cur)=>{const idx=side==='rev'?REVI:EXPI;
+    let o=`<option value="${tot}">${side==='rev'?'รวมรายได้':'รวมค่าใช้จ่าย'} (${S.basis==='assess'?'เฉพาะหมวดที่ประเมิน':'ทุกหมวด'})</option><optgroup label="หมวดที่ประเมิน">`;
+    o+=idx.filter(i=>CAT[i].assess).map(i=>`<option value="${CAT[i].id}">${CAT[i].id} ${esc(CAT[i].name)}</option>`).join('')+'</optgroup><optgroup label="หมวดที่ไม่นำมาประเมิน">';
+    o+=idx.filter(i=>!CAT[i].assess).map(i=>`<option value="${CAT[i].id}">${CAT[i].id} ${esc(CAT[i].name)}</option>`).join('')+'</optgroup>';return o;};
+  $('selRevCat').innerHTML=mk('rev','REV');$('selRevCat').value=S.revCat;
+  $('selExpCat').innerHTML=mk('exp','EXP');$('selExpCat').value=S.expCat;
+}
+
+/* ---------- charts ---------- */
+const CH={};
+function mkChart(id,cfg){if(CH[id])CH[id].destroy();CH[id]=new Chart($(id),cfg);}
+function baseOpts(){Chart.defaults.font.family=getComputedStyle(document.body).fontFamily;Chart.defaults.color=css('--ink2');Chart.defaults.borderColor=css('--line');}
+
+/* ---------- TAB 1 ---------- */
+function renderT1(){
+  const G=group();const N=G.length;
+  const R=G.map(h=>({h,...overall(h)}));
+  const cnt=(arr,f)=>arr.filter(f).length;
+  const rp=cnt(R,x=>x.r.st==='pass'),ep=cnt(R,x=>x.e.st==='pass'),bp=cnt(R,x=>x.st==='pass');
+  const kp=(title,p,parts,legend)=>`<div class="panel kpi"><div class="lab">${title}</div>
+    <div class="big">${N?f1(pct(p,N)):'–'}%<small>${p} จาก ${N} แห่ง</small></div>
+    <div class="meter">${parts.map(([n,c])=>`<span style="width:${pct(n,N)}%;background:var(${c})"></span>`).join('')}</div>
+    <div class="legend">${legend}</div></div>`;
+  const lg=(c,t,n)=>`<span><i style="background:var(${c})"></i>${t} ${n}</span>`;
+  const rl=cnt(R,x=>x.r.st==='low'),rh=cnt(R,x=>x.r.st==='high'),rn=N-rp-rl-rh;
+  const el=cnt(R,x=>x.e.st==='low'),eh=cnt(R,x=>x.e.st==='high'),en=N-ep-el-eh;
+  const onlyR=cnt(R,x=>x.r.st==='pass'&&x.e.st!=='pass'),onlyE=cnt(R,x=>x.r.st!=='pass'&&x.e.st==='pass'),neither=N-bp-onlyR-onlyE;
+  $('kpis').innerHTML=
+    kp('ผ่านเกณฑ์ด้านรายได้',rp,[[rp,'--pass'],[rl,'--low'],[rh,'--high'],[rn,'--na']],lg('--pass','ผ่าน',rp)+lg('--low','ต่ำกว่าแผน',rl)+lg('--high','สูงกว่าแผน',rh)+(rn?lg('--na','ไม่มีแผน',rn):''))+
+    kp('ผ่านเกณฑ์ด้านค่าใช้จ่าย',ep,[[ep,'--pass'],[el,'--low'],[eh,'--high'],[en,'--na']],lg('--pass','ผ่าน',ep)+lg('--low','ต่ำกว่าแผน',el)+lg('--high','สูงกว่าแผน',eh)+(en?lg('--na','ไม่มีแผน',en):''))+
+    kp('ผ่านทั้งสองด้าน (ภาพรวม)',bp,[[bp,'--pass'],[onlyR,'--rev'],[onlyE,'--exp'],[neither,'--high']],lg('--pass','ผ่านทั้งคู่',bp)+lg('--rev','ผ่านเฉพาะรายได้',onlyR)+lg('--exp','ผ่านเฉพาะค่าใช้จ่าย',onlyE)+lg('--high','ไม่ผ่านทั้งคู่',neither));
+
+  // scatter
+  baseOpts();
+  const t=S.thr,pts=R.filter(x=>x.r.dev!==null&&x.e.dev!==null);
+  const lim=Math.max(15,t*3,...pts.map(x=>Math.min(60,Math.max(Math.abs(x.r.dev),Math.abs(x.e.dev)))))*1.08;
+  const colFor=x=>x.st==='pass'?css('--pass'):(x.r.st==='pass'||x.e.st==='pass')?css('--low'):css('--high');
+  const band={id:'band',beforeDatasetsDraw(c){const {ctx,scales:{x,y}}=c;ctx.save();ctx.fillStyle=css('--band');
+    const x0=S.dir==='two'?-t:-t,x1=S.dir==='two'?t:lim,y0=S.dir==='two'?-t:-lim,y1=t;
+    ctx.fillRect(x.getPixelForValue(x0),y.getPixelForValue(y1),x.getPixelForValue(x1)-x.getPixelForValue(x0),y.getPixelForValue(y0)-y.getPixelForValue(y1));
+    ctx.strokeStyle=css('--ink2');ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(x.getPixelForValue(0),y.top);ctx.lineTo(x.getPixelForValue(0),y.bottom);ctx.moveTo(x.left,y.getPixelForValue(0));ctx.lineTo(x.right,y.getPixelForValue(0));ctx.stroke();ctx.restore();}};
+  const clamp=v=>Math.max(-lim*.98,Math.min(lim*.98,v));
+  mkChart('chScatter',{type:'scatter',data:{datasets:[{data:pts.map(x=>({x:clamp(x.r.dev),y:clamp(x.e.dev),h:x})),
+      pointRadius:c=>c.raw&&c.raw.h.h.code===S.focus?8:5,pointHoverRadius:8,
+      pointBackgroundColor:c=>c.raw?colFor(c.raw.h):'#999',pointBorderColor:c=>c.raw&&c.raw.h.h.code===S.focus?css('--ink'):'transparent',pointBorderWidth:2}]},
+    options:{maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const x=c.raw.h;return[`${x.h.code} ${short(x.h.name)}`,`รายได้ ${fP(x.r.dev)}  ค่าใช้จ่าย ${fP(x.e.dev)}`];}}}},
+      scales:{x:{min:-lim,max:lim,title:{display:true,text:'% คลาดเคลื่อนรายได้'},ticks:{callback:v=>v+'%'}},y:{min:-lim,max:lim,title:{display:true,text:'% คลาดเคลื่อนค่าใช้จ่าย'},ticks:{callback:v=>v+'%'}}},
+      onClick:(e,els)=>{if(els.length){S.hosp=pts[els[0].index].h.code;goTab(2);}}},plugins:[band]});
+
+  // by group
+  const key=S.by;let cats=[...new Set(G.map(h=>h[key]))];
+  if(key==='lvl')cats.sort((a,b)=>SIZE_ORDER.indexOf(a)-SIZE_ORDER.indexOf(b));else cats.sort((a,b)=>a.localeCompare(b,'th'));
+  const rate=(c,f)=>{const s=R.filter(x=>x.h[key]===c);return s.length?pct(s.filter(f).length,s.length):0;};
+  const nOf=c=>R.filter(x=>x.h[key]===c).length;
+  mkChart('chBy',{type:'bar',data:{labels:cats.map(c=>`${c} (${nOf(c)})`),datasets:[
+      {label:'รายได้',data:cats.map(c=>rate(c,x=>x.r.st==='pass')),backgroundColor:css('--rev')},
+      {label:'ค่าใช้จ่าย',data:cats.map(c=>rate(c,x=>x.e.st==='pass')),backgroundColor:css('--exp')},
+      {label:'ผ่านทั้งสองด้าน',data:cats.map(c=>rate(c,x=>x.st==='pass')),backgroundColor:css('--pass')}]},
+    options:{maintainAspectRatio:false,animation:false,indexAxis:cats.length>6?'y':'x',plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${f1(c.raw)}%`}}},
+      scales:{[cats.length>6?'x':'y']:{min:0,max:100,ticks:{callback:v=>v+'%'}}}}});
+
+  // table
+  $('t1sub').textContent=`${N} แห่ง ข้อมูลสะสม ${D.months[S.m].n} เดือน (ถึง ${D.months[S.m].fname}) หน่วยล้านบาท คลิกชื่อ รพ. เพื่อดูรายละเอียด คลิกหัวตารางเพื่อเรียง`;
+  const cols=[['code','รหัส','l'],['name','โรงพยาบาล','l'],['prov','จังหวัด','l'],['grp','กลุ่มบริการ','l'],
+    ['rT','เป้ารายได้'],['rA','รายได้จริง'],['rD','% คลาด'],['rS','ผลรายได้'],['eT','เป้าค่าใช้จ่าย'],['eA','ค่าใช้จ่ายจริง'],['eD','% คลาด'],['eS','ผลค่าใช้จ่าย'],['oS','ภาพรวม']];
+  const get=(x,k)=>({code:x.h.code,name:x.h.name,prov:x.h.prov,grp:x.h.grp,rT:x.r.T,rA:x.r.A,rD:x.r.dev??-1e9,rS:x.r.st,eT:x.e.T,eA:x.e.A,eD:x.e.dev??-1e9,eS:x.e.st,oS:x.st}[k]);
+  const {k,d}=S.t1sort;const rows=[...R].sort((a,b)=>{const va=get(a,k),vb=get(b,k);return (typeof va==='number'?va-vb:String(va).localeCompare(String(vb),'th'))*d;});
+  pinFocus(rows,x=>x.h);
+  $('tbl1').innerHTML=`<thead><tr>${cols.map(c=>`<th class="${c[2]||''}" data-k="${c[0]}">${c[1]}${k===c[0]?(d>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead><tbody>`+
+    rows.map(x=>`<tr class="${x.h.code===S.focus?'focus':''}"><td class="l">${x.h.code}</td><td class="l clickable" data-h="${x.h.code}"><u>${esc(short(x.h.name))}</u></td><td class="l">${esc(x.h.prov)}</td><td class="l">${esc(x.h.grp)}</td>
+      <td>${fM(x.r.T)}</td><td>${fM(x.r.A)}</td><td class="t-${x.r.st}">${fP(x.r.dev)}</td><td><span class="pill s-${x.r.st}">${LBL[x.r.st]}</span></td>
+      <td>${fM(x.e.T)}</td><td>${fM(x.e.A)}</td><td class="t-${x.e.st}">${fP(x.e.dev)}</td><td><span class="pill s-${x.e.st}">${LBL[x.e.st]}</span></td>
+      <td><span class="pill ${x.st==='pass'?'s-pass':'s-high'}">${x.st==='pass'?'ผ่าน':'ไม่ผ่าน'}</span></td></tr>`).join('')+'</tbody>';
+}
+$('tbl1').addEventListener('click',e=>{const th=e.target.closest('th');if(th){const k=th.dataset.k;S.t1sort={k,d:S.t1sort.k===k?-S.t1sort.d:1};renderT1();return;}
+  const td=e.target.closest('[data-h]');if(td){S.hosp=td.dataset.h;goTab(2);}});
+
+/* ---------- dot plot ---------- */
+const RANGE=50;
+function dpHead(first){const ticks=[-50,-25,0,25,50];
+  return `<div class="dp-head"><div class="h-n">${first}</div><div class="scale">${ticks.map(v=>`<span style="left:${(v+RANGE)/(2*RANGE)*100}%">${v>0?'+':''}${v}%</span>`).join('')}</div><div class="num h-t">เป้าหมาย</div><div class="num h-a">ผลจริง</div><div class="num">% คลาด</div><div class="num">ต่างจากเป้า</div><div class="num" style="text-align:center">ผลประเมิน</div></div>`;}
+function track(v){
+  const pos=x=>(Math.max(-RANGE,Math.min(RANGE,x))+RANGE)/(2*RANGE)*100;
+  const t=S.thr;let lo=-t,hi=t;if(S.dir==='one'){if(v.side==='rev')hi=RANGE;else lo=-RANGE;}
+  let h=`<div class="track"><div class="axis"></div><div class="band" style="left:${pos(lo)}%;width:${pos(hi)-pos(lo)}%"></div><div class="tgt" style="left:50%"></div>`;
+  if(v.dev!==null){const p=pos(v.dev);const a=Math.min(50,p),b=Math.max(50,p);
+    h+=`<div class="stem bg-${v.st}" style="left:${a}%;width:${b-a}%"></div>`;
+    if(Math.abs(v.dev)>RANGE)h+=`<div class="clip t-${v.st}" style="left:${v.dev>0?98:2}%">${v.dev>0?'»':'«'}</div>`;
+    else h+=`<div class="dot bg-${v.st}" style="left:${p}%"></div>`;}
+  return h+'</div>';}
+function dpRow(name,subtxt,v,cls){
+  return `<div class="dp-row ${cls||''}" title="${esc(name)}"><div class="nm">${name}${subtxt?`<small>${subtxt}</small>`:''}</div>${track(v)}<div class="num c-t">${fM(v.T)}</div><div class="num c-a">${fM(v.A)}</div><div class="num t-${/muted/.test(cls||'')?'none':v.st}"><b>${v.dev===null?LBL[v.st]:fP(v.dev)}</b></div><div class="num t-${/muted/.test(cls||'')||v.st==='pass'?'none':v.st}">${(v.A-v.T)>0.005?'+':''}${fM(v.A-v.T)}</div><div class="num" style="text-align:center">${markOf(v,cls)}</div></div>`;}
+function markOf(v,cls){if(v.st==='none')return'<span class="t-none">–</span>';
+  if(/muted/.test(cls||''))return'<span class="pill s-none">ไม่ประเมิน</span>';
+  return v.st==='pass'?'<span class="pill s-pass">ผ่าน</span>':'<span class="pill s-high">ไม่ผ่าน</span>';}
+function dpLegend(){const t=S.thr;const txt=S.dir==='two'?`ผ่านเมื่อผลจริงอยู่ในช่วง ±${t}% ของเป้าหมาย`:`รายได้ผ่านเมื่อไม่ต่ำกว่าเป้าเกิน ${t}% ค่าใช้จ่ายผ่านเมื่อไม่เกินเป้าเกิน ${t}%`;
+  document.querySelectorAll('.dplegend').forEach(p=>p.innerHTML=`เส้นตั้งคือเป้าหมายสะสม แถบเขียวคือช่วงผ่านเกณฑ์ (${txt}) จุดคือผลจริง หน่วยล้านบาท ค่าที่เกิน ±50% แสดงเป็น « » คลิกแถวที่มี › เพื่อดูบัญชีย่อยในหมวด`);}
+
+function accList(h,cid){const ci=CAT.findIndex(c=>c.id===cid);const pi=S.plan==='p2'?2:1;
+  return h.x.filter(r=>ACC[r[0]].g===ci).map(r=>{const v=evalAT(r[3+S.m],r[pi],S.m,CAT[ci].side);return{a:ACC[r[0]],ai:r[0],v};})
+    ;}
+function subPanel(h,cid){const L=accList(h,cid);const c=CAT.find(x=>x.id===cid);
+  const tot0=evalv(h,cid);const dir=(tot0.A-tot0.T)>=0?-1:1;L.sort((p,q)=>dir*((p.v.A-p.v.T)-(q.v.A-q.v.T)));
+  if(!L.length)return `<div class="dp-sub"><div class="cap">ไม่มีบัญชีย่อยที่มีแผนหรือผลในหมวดนี้</div></div>`;
+  const tot=evalv(h,cid);const gap=tot.A-tot.T;
+  return `<div class="dp-sub"><div class="cap">${esc(h.code)} ${esc(short(h.name))} หมวด ${c.id} ${esc(c.name)} มี ${L.length} บัญชีย่อย ผลต่างรวม ${gap>0?'+':''}${fM(gap)} ลบ. ${gap>=0?'หมวดนี้สูงกว่าแผน จึงเรียงบัญชีที่สูงกว่าแผนมากที่สุดขึ้นก่อน':'หมวดนี้ต่ำกว่าแผน จึงเรียงบัญชีที่ต่ำกว่าแผนมากที่สุดขึ้นก่อน'}</div>`+subChartHtml(h,cid)+
+    L.map(x=>{const ka=`${h.code}|${cid}|${x.ai}`;const op=S.openAcc.has(ka);
+      return dpRow(`<span class="caret">›</span>${esc(x.a.n)}`,x.v.T<0||x.v.A<0?'บัญชีรายการหัก':'',x.v,`${c.assess?'':'muted '}exp${op?' open':''}" data-a="${ka}`)+(op?subChartHtml(h,cid,x.ai):'');}).join('')+'</div>';}
+function expRow(h,cid,nameHtml,subtxt,v,cls){const k=h.code+'|'+cid;const open=S.open.has(k);
+  return dpRow(`<span class="caret">›</span>${nameHtml}`,subtxt,v,`${cls||''} exp${open?' open':''}" data-x="${k}`)+(open?subPanel(h,cid):'');}
+const SC={};
+function scId(h,cid,ai){return 'sc_'+h.code+'_'+cid+(ai!=null?'_a'+ai:'');}
+function subChartHtml(h,cid,ai){const k=h.code+'|'+cid+(ai!=null?'|'+ai:'');return `<div class="subchart${ai!=null?' acc':''}"><div class="top"><span>${ai!=null?esc(ACC[ai].n)+' ':''}ผลจริงเทียบเป้าหมาย ${S.subMode==='c'?'สะสม':'รายเดือน'} (ล้านบาท)</span><div class="seg subseg" data-k="${k}"><button data-v="m" class="${S.subMode==='m'?'on':''}">รายเดือน</button><button data-v="c" class="${S.subMode==='c'?'on':''}">สะสม</button></div></div><div class="box"><canvas id="${scId(h,cid,ai)}" data-k="${k}"></canvas></div></div>`;}
+function drawSubCharts(){baseOpts();document.querySelectorAll('canvas[id^="sc_"]').forEach(cv=>{if(SC[cv.id]&&SC[cv.id].canvas===cv)return;
+  if(SC[cv.id])SC[cv.id].destroy();const [code,cid,ais]=cv.dataset.k.split('|');const h=HB[code];const ci=CAT.findIndex(c=>c.id===cid);
+  const ms=D.months.slice(0,S.m+1);let cum,P;
+  if(ais!==undefined){const r=h.x.find(r=>r[0]===+ais)||[];cum=ms.map((_,i)=>(r[3+i]||0)/1e6);P=(r[S.plan==='p2'?2:1]||0)/1e6;}
+  else{cum=ms.map((_,i)=>h.a[ci][i]/1e6);P=h[S.plan][ci]/1e6;}const col=css(CAT[ci].side==='rev'?'--rev':'--exp');
+  let act,tgt;if(S.subMode==='c'){act=cum;tgt=ms.map(m=>P*m.n/12);}else{act=cum.map((v,i)=>i?v-cum[i-1]:v);tgt=ms.map(()=>P/12);}
+  const devs=act.map((a,i)=>Math.abs(tgt[i])>1e-6?(a-tgt[i])/Math.abs(tgt[i])*100:null);
+  SC[cv.id]=new Chart(cv,{data:{labels:ms.map(m=>m.short),datasets:[
+    S.subMode==='c'?{type:'line',label:'ผลจริงสะสม',data:act,borderColor:col,backgroundColor:col,tension:.2,pointRadius:3,order:1}
+      :{type:'bar',label:'ผลจริงรายเดือน',data:act,backgroundColor:act.map((a,i)=>{const d=devs[i];if(d===null)return css('--na');const t=S.thr;const ok=S.dir==='two'?Math.abs(d)<=t:(CAT[ci].side==='rev'?d>=-t:d<=t);return ok?css('--pass'):(d<0?css('--low'):css('--high'));}),order:2},
+    {type:'line',label:S.subMode==='c'?'เป้าหมายสะสม':'เป้าหมายต่อเดือน (แผนทั้งปี ÷ 12)',data:tgt,borderColor:css('--ink'),borderDash:[5,4],pointRadius:0,borderWidth:1.5,order:0}]},
+    options:{maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.raw.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})} ลบ.`,afterBody:it=>{const d=devs[it[0].dataIndex];return d===null?'':`คลาดเคลื่อน ${fP(d)}`;}}}},
+      scales:{y:{ticks:{callback:v=>v.toLocaleString('th-TH')}}}}});});}
+document.addEventListener('click',e=>{const b=e.target.closest('.subseg button');if(!b)return;e.stopPropagation();S.subMode=b.dataset.v;
+  document.querySelectorAll('.subchart').forEach(sc=>{const cv=sc.querySelector('canvas');const [code,cid,ais]=cv.dataset.k.split('|');if(SC[cv.id]){SC[cv.id].destroy();delete SC[cv.id];}sc.outerHTML=subChartHtml(HB[code],cid,ais!==undefined?+ais:null);});drawSubCharts();},true);
+function toggleExp(e){if(e.target.closest('.subchart'))return true;
+  const ra=e.target.closest('[data-a]');if(ra){const k=ra.dataset.a;const [code,cid,ais]=k.split('|');
+    if(S.openAcc.has(k))S.openAcc.delete(k);else S.openAcc.add(k);
+    const nx=ra.nextElementSibling;if(nx&&nx.classList.contains('subchart')){const cv=nx.querySelector('canvas');if(SC[cv.id]){SC[cv.id].destroy();delete SC[cv.id];}nx.remove();}
+    ra.classList.toggle('open',S.openAcc.has(k));if(S.openAcc.has(k)){ra.insertAdjacentHTML('afterend',subChartHtml(HB[code],cid,+ais));drawSubCharts();}return true;}
+  if(e.target.closest('[data-h]'))return false;const r=e.target.closest('[data-x]');if(!r)return false;
+  const k=r.dataset.x;if(S.open.has(k))S.open.delete(k);else S.open.add(k);
+  const [code,cid]=k.split('|');const h=HB[code];const was=r.nextElementSibling;
+  if(was&&was.classList.contains('dp-sub'))was.remove();
+  r.classList.toggle('open',S.open.has(k));if(S.open.has(k))r.insertAdjacentHTML('afterend',subPanel(h,cid));drawSubCharts();return true;}
+['dpRev','dpExp'].forEach(id=>$(id).addEventListener('click',toggleExp));
+
+/* ---------- TAB 2 ---------- */
+function renderT2(){
+  const G=group();
+  if(!G.length){$('selHosp').innerHTML='';$('hInfo').innerHTML='<div class="empty">ยังไม่มี รพ. ในกลุ่มเปรียบเทียบ เลือกตัวกรองหรือเลือก รพ. เองก่อน</div>';['dpRev','dpExp','hVerdict'].forEach(i=>$(i).innerHTML='');return;}
+  if(!S.hosp||!G.some(h=>h.code===S.hosp))S.hosp=(S.focus&&HB[S.focus]?S.focus:G[0].code);
+  const list=pinFocus([...G].sort((a,b)=>a.code.localeCompare(b.code)),h=>h);
+  if(!list.some(h=>h.code===S.hosp))list.unshift(HB[S.hosp]);
+  $('selHosp').innerHTML=list.map(h=>`<option value="${h.code}"${h.code===S.hosp?' selected':''}>${h.code} ${esc(short(h.name))} (${esc(h.prov)})</option>`).join('');
+  const h=HB[S.hosp];const o=overall(h);
+  $('hInfo').innerHTML=`<span>จังหวัด <b>${esc(h.prov)}</b></span><span>ประเภท <b>${esc(h.type)} ${esc(h.lvl)}</b></span><span>กลุ่มบริการ <b>${esc(h.grp)}</b></span><span>เตียง <b>${h.bed??'–'}</b></span><span>ประชากร UC <b>${h.pop?h.pop.toLocaleString('th-TH'):'–'}</b></span>`;
+  const vb=(t,v)=>`<div class="vbox"><div class="v1">${t}</div><div class="v2 t-${v.st}">${fP(v.dev)}</div><span class="pill s-${v.st}">${LBL[v.st]}</span> <span style="font-size:13px;color:var(--ink2)">${fM(v.A)} จากเป้า ${fM(v.T)} ลบ.</span></div>`;
+  const ni=o.r.A-o.e.A,niT=o.r.T-o.e.T;
+  $('hVerdict').innerHTML=vb('รายได้รวม',o.r)+vb('ค่าใช้จ่ายรวม',o.e)+
+    `<div class="vbox"><div class="v1">ภาพรวมแผน</div><div class="v2 ${o.st==='pass'?'t-pass':'t-high'}">${o.st==='pass'?'ผ่าน':'ไม่ผ่าน'}</div><span style="font-size:13px;color:var(--ink2)">ส่วนต่างรายได้หักค่าใช้จ่าย ${fM(ni)} ลบ. (แผน ${fM(niT)})</span></div>`;
+  // lines
+  baseOpts();
+  const ms=D.months.slice(0,S.m+1);
+  const line=(id,key,color)=>{const act=ms.map((_,i)=>amt(h,key,i).A/1e6);const P=amt(h,key).P;const tgt=ms.map(m=>P*m.n/12/1e6);
+    mkChart(id,{type:'line',data:{labels:ms.map(m=>m.short),datasets:[{label:'ผลจริงสะสม',data:act,borderColor:color,backgroundColor:color,tension:.2,pointRadius:3},
+      {label:'เป้าหมายสะสม',data:tgt,borderColor:css('--ink2'),borderDash:[5,4],pointRadius:0,borderWidth:1.5}]},
+      options:{maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${f1(c.raw)} ลบ.`,afterBody:it=>{const a=it[0].dataIndex;const d=tgt[a]?(act[a]-tgt[a])/tgt[a]*100:null;return d===null?'':`คลาดเคลื่อน ${fP(d)}`;}}}},
+      scales:{y:{title:{display:true,text:'ล้านบาท'}}}}});};
+  line('chRevLine','REV',css('--rev'));line('chExpLine','EXP',css('--exp'));
+  dpLegend();
+  const block=(side,tot,title)=>{const idx=side==='rev'?REVI:EXPI;let s=dpHead('หมวด')+dpRow(title,S.basis==='assess'?'เฉพาะหมวดที่ประเมิน':'ทุกหมวด',evalv(h,tot),'total');
+    for(const i of idx){const v=evalv(h,CAT[i].id);const muted=!CAT[i].assess||(v.st==='none');s+=expRow(h,CAT[i].id,`${CAT[i].id} ${esc(CAT[i].name)}`,CAT[i].assess?'':'ไม่นำมาประเมิน',v,muted?'muted':'');}
+    return s;};
+  $('dpRev').innerHTML=block('rev','REV','รวมรายได้');$('dpExp').innerHTML=block('exp','EXP','รวมค่าใช้จ่าย');
+}
+
+/* ---------- TAB 3/4 ---------- */
+function renderCat(side){
+  const isR=side==='rev';const key=isR?S.revCat:S.expCat;const sortBy=isR?S.sortRev:S.sortExp;
+  const G=group();const V=G.map(h=>({h,v:evalv(h,key)}));
+  const N=V.length,valid=V.filter(x=>x.v.st!=='none');const nv=valid.length;
+  const c=st=>V.filter(x=>x.v.st===st).length;
+  const sumA=V.reduce((s,x)=>s+x.v.A,0),sumT=V.reduce((s,x)=>s+x.v.T,0);
+  const gdev=sumT?(sumA-sumT)/Math.abs(sumT)*100:null;
+  const catName=key==='REV'?'รวมรายได้':key==='EXP'?'รวมค่าใช้จ่าย':`${key} ${CAT.find(c=>c.id===key).name}`;
+  const box=(t,v,cls,sub)=>`<div class="vbox"><div class="v1">${t}</div><div class="v2 ${cls||''}">${v}</div>${sub?`<div style="font-size:13px;color:var(--ink2)">${sub}</div>`:''}</div>`;
+  $(isR?'stRev':'stExp').innerHTML=box('ผ่านเกณฑ์',nv?f1(pct(c('pass'),nv))+'%':'–','t-pass',`${c('pass')} จาก ${nv} แห่งที่มีแผนหรือผล`)+
+    box('ต่ำกว่าแผน',c('low'),'t-low')+box('สูงกว่าแผน',c('high'),'t-high')+box('มีผลแต่ไม่มีแผน',c('noplan'),'t-noplan')+
+    (c('none')?box('ไม่มีทั้งแผนและผล',c('none'),'t-none'):'')+
+    box('ยอดรวมกลุ่ม เทียบเป้า',fP(gdev),'',`${fM(sumA)} จากเป้า ${fM(sumT)} ลบ.`);
+  $(isR?'h3dp':'h4dp').textContent=`${catName} ราย รพ.`;
+  dpLegend();
+  let rows=[...V];
+  if(sortBy==='dev')rows.sort((a,b)=>(a.v.dev??(a.v.st==='none'?1e9:9e8))-(b.v.dev??(b.v.st==='none'?1e9:9e8)));else rows.sort((a,b)=>a.h.code.localeCompare(b.h.code));
+  pinFocus(rows,x=>x.h);
+  $(isR?'dpRevCat':'dpExpCat').innerHTML=N?dpHead('โรงพยาบาล')+rows.map(x=>{const nm=`<span class="clickable" data-h="${x.h.code}"><u>${x.h.code} ${esc(short(x.h.name))}</u></span>`,sb=`${esc(x.h.prov)} ${esc(x.h.grp)}`,cl=(x.h.code===S.focus?'focus':'')+(x.v.st==='none'?' muted':'');
+    return (key==='REV'||key==='EXP')?dpRow(nm,sb,x.v,cl):expRow(x.h,key,nm,sb,x.v,cl);}).join(''):'<div class="empty">ยังไม่มี รพ. ในกลุ่มเปรียบเทียบ</div>';
+  // heat
+  const idx=(isR?REVI:EXPI).filter(i=>CAT[i].assess||!CAT[i].assess);
+  const colKeys=[isR?'REV':'EXP',...idx.map(i=>CAT[i].id)];
+  const hdr=k=>k==='REV'?'รวมรายได้':k==='EXP'?'รวมค่าใช้จ่าย':`${k}<br>${esc(CAT.find(c=>c.id===k).name)}${CAT.find(c=>c.id===k).assess?'':' (ไม่ประเมิน)'}`;
+  const hrows=pinFocus([...G].sort((a,b)=>a.code.localeCompare(b.code)),h=>h);
+  const cell=(v,hc,k)=>{const cx=(k==='REV'||k==='EXP')?'':` class="cellx" data-cx="${hc}|${k}" title="คลิกเพื่อดูบัญชีย่อย"`;if(v.st==='none')return'<td class="t-none">·</td>';const a=v.dev===null?1:Math.min(1,Math.abs(v.dev)/(S.thr*4||20));
+    const col=v.st==='pass'?'--pass':v.st==='low'?'--low':'--high';
+    return `<td${cx} style="background:color-mix(in srgb, var(${col}) ${v.st==='pass'?14:Math.round(14+a*46)}%, transparent)">${v.dev===null?'ไม่มีแผน':fP(v.dev)}</td>`;};
+  const passRow=colKeys.map(k=>{const vv=G.map(h=>evalv(h,k)).filter(v=>v.st!=='none');return vv.length?f1(pct(vv.filter(v=>v.st==='pass').length,vv.length))+'%':'–';});
+  $(isR?'heatRev':'heatExp').innerHTML=`<thead><tr><th class="l">โรงพยาบาล</th>${colKeys.map(k=>`<th data-cat="${k}" class="${k===key?'sel':''}">${hdr(k)}</th>`).join('')}</tr>
+    <tr><th class="l">% ผ่านในกลุ่ม</th>${passRow.map(p=>`<th>${p}</th>`).join('')}</tr></thead><tbody>`+
+    hrows.map(h=>`<tr class="${h.code===S.focus?'focus':''}"><td class="l clickable" data-h="${h.code}"><u>${h.code} ${esc(short(h.name))}</u></td>${colKeys.map(k=>cell(evalv(h,k),h.code,k)).join('')}</tr>`).join('')+'</tbody>';
+}
+function renderT3(){renderCat('rev');drawSubCharts();}
+function renderT4(){renderCat('exp');drawSubCharts();}
+['heatRev','heatExp','dpRevCat','dpExpCat'].forEach(id=>$(id).addEventListener('click',e=>{
+  if(id.startsWith('dp')&&toggleExp(e))return;
+  const cx=e.target.closest('td[data-cx]');if(cx){const [code,cid]=cx.dataset.cx.split('|');S.hosp=code;S.open.add(code+'|'+cid);goTab(2);setTimeout(()=>{const r=document.querySelector(`#tab2 [data-x="${code}|${cid}"]`);if(r)r.scrollIntoView({block:'center'});},30);return;}
+  const th=e.target.closest('th[data-cat]');if(th){if(id==='heatRev'){S.revCat=th.dataset.cat;$('selRevCat').value=S.revCat;renderT3();}else{S.expCat=th.dataset.cat;$('selExpCat').value=S.expCat;renderT4();}window.scrollTo({top:$(id==='heatRev'?'tab3':'tab4').offsetTop-10,behavior:'smooth'});return;}
+  const h=e.target.closest('[data-h]');if(h){S.hosp=h.dataset.h;goTab(2);window.scrollTo({top:0});}}));
+
+/* ---------- render ---------- */
+function render(){
+  const m=D.months[S.m];
+  $('hdrsub').textContent=`ปีงบประมาณ ${D.fy} ข้อมูลสะสม ${m.n} เดือน ถึง ${m.fname} เทียบ${S.plan==='p2'?'แผนปรับกลางปี':'แผนต้นปี'} กลุ่มเปรียบเทียบ ${group().length} แห่ง`;
+  if(S.tab===1)renderT1();else if(S.tab===2)renderT2();else if(S.tab===3)renderT3();else renderT4();
+  drawSubCharts();
+  $('footnote').innerHTML=`เป้าหมายสะสม = แผนประมาณการทั้งปี × ${m.n}/12 และ % คลาดเคลื่อน = (ผลจริงสะสม − เป้าหมายสะสม) ÷ เป้าหมายสะสม
+  ผลจริงคำนวณจากงบทดลองสะสม (ยอดคงเหลือ Dr−Cr) จับคู่ผังบัญชีกับหมวด Planfin ตามตาราง AccCode ส่วนแผนมาจาก hig_est_current ที่ รพ. บันทึกรายบัญชี
+  ${S.basis==='assess'?'ยอดรวมใช้เฉพาะหมวดที่ประเมิน (ไม่รวมรายได้/ค่าใช้จ่ายที่ระบบบันทึกอัตโนมัติ รายได้งบลงทุน และค่าเสื่อมราคา) ตามนิยาม P291/P292':'ยอดรวมใช้ทุกหมวด ตามนิยาม P13S/P26S'}
+  หมวดที่มีผลจริงแต่ไม่ได้ทำแผนนับเป็นไม่ผ่าน ส่วนหมวดที่ไม่มีทั้งแผนและผลไม่นำมาคิดร้อยละ
+  ที่มาข้อมูล ${esc(D.src)} และกลุ่มบริการ ปีงบ 2569 (กบรส. มี.ค. 2569)`;
+}
+initControls();render();
+})();
+</script>
+</body>
+</html>
