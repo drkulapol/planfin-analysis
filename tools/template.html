@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --bg:#EEF1F5; --panel:#FFFFFF; --ink:#1B2533; --ink2:#556275; --line:#D9DFE7; --soft:#F5F7FA;
@@ -123,6 +124,36 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
 .subchart .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--ink2)}
 .subchart .seg button{min-height:30px;padding:4px 12px;font-size:13px}
 .subchart .box{position:relative;height:230px;margin-top:6px}
+.credit{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);text-align:center;font-size:13.5px;color:var(--ink2);line-height:1.7}
+.credit .c1{font-size:12.5px;letter-spacing:.2px}
+.credit .c2{font-size:15px;font-weight:600;color:var(--ink)}
+.credit a{color:var(--blue);text-decoration:none;font-weight:500}
+.credit a:hover{text-decoration:underline}
+.dlbar{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--ink2);margin-left:auto}
+.dlbtn{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:5px 12px;min-height:34px;cursor:pointer}
+.dlbtn:hover{border-color:var(--blue);color:var(--blue)}
+.dlbtn:disabled{opacity:.5;cursor:wait}
+#printArea{display:none}
+@page{size:A4 landscape;margin:10mm}
+@media print{
+  body.printing{background:#fff;color:#000}
+  body.printing .wrap{display:none}
+  body.printing #printArea{display:block;font-family:"IBM Plex Sans Thai","Sarabun","Tahoma",sans-serif;color:#000}
+  #printArea h1{font-size:15pt;margin:0 0 2mm}
+  #printArea .meta{font-size:9pt;color:#333;margin:0 0 4mm;line-height:1.5}
+  #printArea h2{font-size:11.5pt;margin:5mm 0 2mm;page-break-after:avoid}
+  #printArea table{width:100%;border-collapse:collapse;font-size:8.5pt;page-break-inside:auto}
+  #printArea th,#printArea td{border:0.5pt solid #999;padding:1.2mm 1.8mm;text-align:right;white-space:normal;color:#000;background:#fff;position:static}
+  #printArea th{background:#EDEFF3;font-weight:600}
+  #printArea thead{display:table-header-group}
+  #printArea tr{page-break-inside:avoid}
+  #printArea td.l,#printArea th.l{text-align:left}
+  #printArea td.ok{color:#11734F;font-weight:600} #printArea td.bad{color:#B42343;font-weight:600} #printArea td.na{color:#777}
+  #printArea tr.tot td{font-weight:700;background:#F5F6F8}
+  #printArea .pcredit{margin-top:6mm;padding-top:2mm;border-top:0.5pt solid #bbb;font-size:8.5pt;color:#444;text-align:center}
+  #printArea tr.acc td:first-child{padding-left:6mm}
+  #printArea tr.cat td{font-weight:600;background:#F5F6F8}
+}
 .hinfo{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:14px;color:var(--ink2);margin-top:6px}
 .hinfo b{color:var(--ink);font-weight:600}
 .verdict{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
@@ -195,7 +226,7 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
     </div>
   </div>
   <div class="panel" style="margin-top:16px">
-    <h2>ผลประเมินราย รพ.</h2>
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start"><h2>ผลประเมินราย รพ.</h2><div class="dlbar"><span>ดาวน์โหลด</span><button class="dlbtn" data-dl="xlsx" data-tab="1">Excel</button><button class="dlbtn" data-dl="pdf" data-tab="1">PDF</button></div></div>
     <p class="sub" id="t1sub"></p>
     <div class="tbl" style="max-height:560px"><table id="tbl1"></table></div>
   </div>
@@ -206,6 +237,7 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
   <div class="panel">
     <div class="catbar" style="margin-bottom:4px">
       <div class="fld"><label for="selHosp">โรงพยาบาล (จากกลุ่มเปรียบเทียบ)</label><select id="selHosp" style="min-width:340px"></select></div>
+      <div class="dlbar"><span>ดาวน์โหลด</span><button class="dlbtn" data-dl="xlsx" data-tab="2">Excel</button><button class="dlbtn" data-dl="pdf" data-tab="2">PDF</button></div>
     </div>
     <div class="hinfo" id="hInfo"></div>
     <div class="verdict" id="hVerdict"></div>
@@ -224,6 +256,7 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
     <div class="catbar">
       <div class="fld"><label for="selRevCat">หมวดรายได้</label><select id="selRevCat"></select></div>
       <div class="fld"><label>เรียงตาม</label><div class="seg" id="segSortRev"><button data-v="dev" class="on">% คลาดเคลื่อน</button><button data-v="name">รหัส รพ.</button></div></div>
+      <div class="dlbar"><span>ดาวน์โหลด</span><button class="dlbtn" data-dl="xlsx" data-tab="3">Excel</button><button class="dlbtn" data-dl="pdf" data-tab="3">PDF</button></div>
     </div>
     <div class="stats" id="stRev"></div>
   </div>
@@ -237,6 +270,7 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
     <div class="catbar">
       <div class="fld"><label for="selExpCat">หมวดค่าใช้จ่าย</label><select id="selExpCat"></select></div>
       <div class="fld"><label>เรียงตาม</label><div class="seg" id="segSortExp"><button data-v="dev" class="on">% คลาดเคลื่อน</button><button data-v="name">รหัส รพ.</button></div></div>
+      <div class="dlbar"><span>ดาวน์โหลด</span><button class="dlbtn" data-dl="xlsx" data-tab="4">Excel</button><button class="dlbtn" data-dl="pdf" data-tab="4">PDF</button></div>
     </div>
     <div class="stats" id="stExp"></div>
   </div>
@@ -245,7 +279,14 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
 </section>
 
 <p class="note" id="footnote"></p>
+<footer class="credit">
+  <div class="c1">ออกแบบและพัฒนาโดย</div>
+  <div class="c2">นายแพทย์กุลพล ตั้งรัตนาพิบูล</div>
+  <div>นายแพทย์ชำนาญการ (ด้านเวชกรรม)</div>
+  <div>ปฏิบัติหน้าที่ผู้อำนวยการ<a href="https://www.songkwaehospital.com/" target="_blank" rel="noopener">โรงพยาบาลสองแคว</a> อำเภอสองแคว จังหวัดน่าน</div>
+</footer>
 </div>
+<div id="printArea"></div>
 
 <script id="data" type="application/json">__DATA__</script>
 <script>
@@ -577,6 +618,88 @@ function render(){
   ที่มาข้อมูล ${esc(D.src)} และกลุ่มบริการ ปีงบ 2569 (กบรส. มี.ค. 2569)`;
 }
 initControls();render();
+
+/* ---------- export (Excel / PDF) ---------- */
+const r2=v=>Math.round(v/1e4)/100, r1=v=>v===null?null:Math.round(v*10)/10;
+function mark(v,assessed){if(v.st==='none')return'–';if(!assessed)return'ไม่ประเมิน';return v.st==='pass'?'ผ่าน':'ไม่ผ่าน';}
+function critText(){return S.dir==='two'?`อยู่ในช่วง ±${S.thr}% ของเป้าหมาย`:`รายได้ไม่ต่ำกว่าเป้าเกิน ${S.thr}% ค่าใช้จ่ายไม่เกินเป้าเกิน ${S.thr}%`;}
+function metaLines(){const m=D.months[S.m];const G=group();
+  const flt=S.mode==='pick'?`เลือก รพ. เอง ${G.length} แห่ง`:[S.prov||'ทุกจังหวัด',S.size||'ทุกขนาด',S.grp||'ทุกกลุ่มบริการ'].join(' / ')+` (${G.length} แห่ง)`;
+  return[`ปีงบประมาณ ${D.fy} ข้อมูลสะสม ${m.n} เดือน ถึง ${m.fname} เทียบ${S.plan==='p2'?'แผนปรับกลางปี':'แผนต้นปี'}`,
+    `กลุ่มเปรียบเทียบ: ${flt}`,`เกณฑ์ผ่าน: ${critText()} ยอดรวม${S.basis==='assess'?'เฉพาะหมวดที่ประเมิน (P291/P292)':'ทุกหมวด (P13S/P26S)'} หน่วยเงิน: ล้านบาท`];}
+const VH=['เป้าหมายสะสม','ผลจริงสะสม','% คลาดเคลื่อน','ต่างจากเป้า','สถานะ','ผลประเมิน'];
+const vcols=(v,assessed)=>[r2(v.T),r2(v.A),r1(v.dev),r2(v.A-v.T),LBL[v.st],mark(v,assessed)];
+function sortedAcc(h,cid){const L=accList(h,cid);const t=evalv(h,cid);const dir=(t.A-t.T)>=0?-1:1;return L.sort((p,q)=>dir*((p.v.A-p.v.T)-(q.v.A-q.v.T)));}
+function buildExport(tab){
+  const m=D.months[S.m];const sheets=[];
+  if(tab===1){
+    const G=group();const R=pinFocus(G.map(h=>({h,...overall(h)})).sort((a,b)=>a.h.code.localeCompare(b.h.code)),x=>x.h);
+    const N=R.length,c=f=>R.filter(f).length;
+    sheets.push({name:'สรุป',head:['ด้าน','ผ่าน (แห่ง)','ทั้งหมด (แห่ง)','ร้อยละผ่าน'],rows:[
+      ['รายได้',c(x=>x.r.st==='pass'),N,r1(pct(c(x=>x.r.st==='pass'),N))],
+      ['ค่าใช้จ่าย',c(x=>x.e.st==='pass'),N,r1(pct(c(x=>x.e.st==='pass'),N))],
+      ['ผ่านทั้งสองด้าน',c(x=>x.st==='pass'),N,r1(pct(c(x=>x.st==='pass'),N))]]});
+    sheets.push({name:'ผลประเมินราย รพ.',head:['รหัส','โรงพยาบาล','จังหวัด','ขนาด','กลุ่มบริการ','เป้ารายได้','รายได้จริง','% คลาด รายได้','ผลรายได้','เป้าค่าใช้จ่าย','ค่าใช้จ่ายจริง','% คลาด ค่าใช้จ่าย','ผลค่าใช้จ่าย','ภาพรวม'],
+      rows:R.map(x=>[x.h.code,x.h.name,x.h.prov,x.h.lvl,x.h.grp,r2(x.r.T),r2(x.r.A),r1(x.r.dev),mark(x.r,true),r2(x.e.T),r2(x.e.A),r1(x.e.dev),mark(x.e,true),x.st==='pass'?'ผ่าน':'ไม่ผ่าน'])});
+    return{title:'ผลประเมิน Planfin ราย รพ.',file:`planfin_ภาพรวม_${m.short}`,sheets};
+  }
+  if(tab===2){
+    const h=HB[S.hosp];if(!h)return null;
+    const rows=[],acc=[];
+    for(const side of['rev','exp']){const tot=side==='rev'?'REV':'EXP';
+      rows.push({c:'tot',r:[side==='rev'?'รวมรายได้':'รวมค่าใช้จ่าย','',...vcols(evalv(h,tot),true)]});
+      for(const i of(side==='rev'?REVI:EXPI)){const c=CAT[i];const v=evalv(h,c.id);
+        rows.push({c:'cat',r:[`${c.id} ${c.name}`,c.assess?'':'ไม่นำมาประเมิน',...vcols(v,c.assess)]});
+        for(const x of sortedAcc(h,c.id)){const row=[`${c.id} ${c.name}`,x.a.c,x.a.n,...vcols(x.v,c.assess)];acc.push(row);rows.push({c:'acc',r:[x.a.n,x.v.T<0||x.v.A<0?'บัญชีรายการหัก':'',...vcols(x.v,c.assess)]});}}}
+    sheets.push({name:'รายหมวดและบัญชีย่อย',head:['หมวด / บัญชี','หมายเหตุ',...VH],rows:rows.map(x=>x.r),cls:rows.map(x=>x.c)});
+    sheets.push({name:'บัญชีย่อย',head:['หมวด','รหัสบัญชี','ชื่อบัญชี',...VH],rows:acc,pdf:false});
+    const ms=D.months.slice(0,S.m+1);const mh=['หมวด','รายการ',...ms.map(x=>x.short)];const mr=[];
+    for(const key of['REV','EXP',...CAT.map(c=>c.id)]){const nm=key==='REV'?'รวมรายได้':key==='EXP'?'รวมค่าใช้จ่าย':`${key} ${CAT.find(c=>c.id===key).name}`;
+      const A=ms.map((_,i)=>amt(h,key,i).A),P=amt(h,key).P;
+      mr.push([nm,'ผลจริงสะสม',...A.map(r2)]);mr.push([nm,'เป้าหมายสะสม',...ms.map(x=>r2(P*x.n/12))]);
+      mr.push([nm,'ผลจริงรายเดือน',...A.map((a,i)=>r2(i?a-A[i-1]:a))]);mr.push([nm,'เป้าต่อเดือน',...ms.map(()=>r2(P/12))]);}
+    sheets.push({name:'รายเดือน',head:mh,rows:mr,pdf:false});
+    return{title:`Planfin ${h.code} ${h.name}`,sub:`${h.prov} ${h.type} ${h.lvl} กลุ่มบริการ ${h.grp}`,file:`planfin_${h.code}_${m.short}`,sheets};
+  }
+  const isR=tab===3,key=isR?S.revCat:S.expCat,side=isR?'rev':'exp';
+  const G=group();const assessed=key==='REV'||key==='EXP'||CAT.find(c=>c.id===key).assess;
+  const catName=key==='REV'?'รวมรายได้':key==='EXP'?'รวมค่าใช้จ่าย':`${key} ${CAT.find(c=>c.id===key).name}`;
+  const V=pinFocus(G.map(h=>({h,v:evalv(h,key)})).sort((a,b)=>(isR?S.sortRev:S.sortExp)==='dev'?((a.v.dev??1e9)-(b.v.dev??1e9)):a.h.code.localeCompare(b.h.code)),x=>x.h);
+  sheets.push({name:'ราย รพ.',head:['รหัส','โรงพยาบาล','จังหวัด','กลุ่มบริการ',...VH],rows:V.map(x=>[x.h.code,x.h.name,x.h.prov,x.h.grp,...vcols(x.v,assessed)])});
+  if(key!=='REV'&&key!=='EXP'){const ar=[];for(const x of V)for(const a of sortedAcc(x.h,key))ar.push([x.h.code,x.h.name,a.a.c,a.a.n,...vcols(a.v,assessed)]);
+    sheets.push({name:'บัญชีย่อยราย รพ.',head:['รหัส','โรงพยาบาล','รหัสบัญชี','ชื่อบัญชี',...VH],rows:ar,pdf:false});}
+  const keys=[isR?'REV':'EXP',...(isR?REVI:EXPI).map(i=>CAT[i].id)];
+  const hs=pinFocus([...G].sort((a,b)=>a.code.localeCompare(b.code)),h=>h);
+  sheets.push({name:'% คลาดทุกหมวด',head:['รหัส','โรงพยาบาล',...keys.map(k=>k==='REV'?'รวมรายได้':k==='EXP'?'รวมค่าใช้จ่าย':k)],
+    rows:hs.map(h=>[h.code,h.name,...keys.map(k=>{const v=evalv(h,k);return v.dev===null?LBL[v.st]:r1(v.dev);})]),pdf:false});
+  return{title:`${catName} ราย รพ.`,file:`planfin_${key}_${m.short}`,sheets};
+}
+function toXlsx(ex){
+  if(typeof XLSX==='undefined'){alert('โหลดตัวสร้างไฟล์ Excel ไม่สำเร็จ ลองรีเฟรชหน้าแล้วกดอีกครั้ง');return;}
+  const wb=XLSX.utils.book_new();const meta=[[ex.title],...(ex.sub?[[ex.sub]]:[]),...metaLines().map(l=>[l]),[]];
+  const used={};
+  for(const s of ex.sheets){const aoa=[...meta,s.head,...s.rows];const ws=XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols']=s.head.map((h,i)=>({wch:Math.min(48,Math.max(String(h).length+2,...s.rows.slice(0,200).map(r=>String(r[i]??'').length+2)))}));
+    let nm=s.name.replace(/[\\\/\?\*\[\]:]/g,' ').slice(0,31);while(used[nm])nm=nm.slice(0,29)+'_'+(used[nm]++);used[nm]=1;
+    XLSX.utils.book_append_sheet(wb,ws,nm);}
+  XLSX.writeFile(wb,ex.file+'.xlsx');
+}
+function toPdf(ex){
+  const cell=(v,j,head)=>{const hd=head[j];let cls=typeof v==='number'?'':'l';
+    if(hd==='ผลประเมิน'||/^ผล(รายได้|ค่าใช้จ่าย)$|^ภาพรวม$/.test(hd))cls=v==='ผ่าน'?'ok':v==='ไม่ผ่าน'?'bad':'na';
+    const s=v===null||v===undefined?'–':typeof v!=='number'?esc(v):hd==='ร้อยละผ่าน'?f1(v)+'%':/%/.test(hd)?fP(v):hd==='ต่างจากเป้า'?(v>0?'+':'')+v.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}):/แห่ง/.test(hd)?String(v):v.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+    return`<td class="${cls}">${s}</td>`;};
+  let html=`<h1>${esc(ex.title)}</h1><div class="meta">${ex.sub?esc(ex.sub)+'<br>':''}${metaLines().map(esc).join('<br>')}</div>`;
+  for(const s of ex.sheets){if(s.pdf===false)continue;
+    html+=`<h2>${esc(s.name)}</h2><table><thead><tr>${s.head.map((h,j)=>`<th class="${j<2?'l':''}">${esc(h)}</th>`).join('')}</tr></thead><tbody>`+
+      s.rows.map((r,i)=>`<tr class="${s.cls?s.cls[i]:''}">${r.map((v,j)=>cell(v,j,s.head)).join('')}</tr>`).join('')+'</tbody></table>';}
+  html+=`<div class="pcredit">ออกแบบและพัฒนาโดย นายแพทย์กุลพล ตั้งรัตนาพิบูล นายแพทย์ชำนาญการ (ด้านเวชกรรม) ปฏิบัติหน้าที่ผู้อำนวยการโรงพยาบาลสองแคว อำเภอสองแคว จังหวัดน่าน</div>`;
+  $('printArea').innerHTML=html;document.body.classList.add('printing');
+  const done=()=>{document.body.classList.remove('printing');$('printArea').innerHTML='';window.removeEventListener('afterprint',done);};
+  window.addEventListener('afterprint',done);setTimeout(()=>window.print(),50);
+}
+document.addEventListener('click',e=>{const b=e.target.closest('.dlbtn');if(!b)return;const ex=buildExport(+b.dataset.tab);
+  if(!ex){alert('ยังไม่ได้เลือกโรงพยาบาล');return;}if(b.dataset.dl==='xlsx')toXlsx(ex);else toPdf(ex);});
 })();
 </script>
 </body>
