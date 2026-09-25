@@ -1,0 +1,5 @@
+*.mdb
+*.accdb
+*.zip
+*.xlsx
+__pycache__/
