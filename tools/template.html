@@ -131,6 +131,7 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
 .sitenav a.on{background:var(--blue);border-color:var(--blue);color:#fff}
 .sitenav a:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 @media print{.sitenav{display:none}}
+.basisnote{font-size:14px;font-weight:500;color:var(--ink2)}
 .credit{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);text-align:center;font-size:13.5px;color:var(--ink2);line-height:1.7}
 .credit .c1{font-size:12.5px;letter-spacing:.2px}
 .credit .c2{font-size:15px;font-weight:600;color:var(--ink)}
@@ -184,7 +185,7 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
     <a class="on" aria-current="page" href="https://drkulapol.github.io/planfin-analysis/">วิเคราะห์ Planfin เขต 1</a>
     <a href="https://drkulapol.github.io/mishos-rh1/">วิเคราะห์รายรับรายกองทุน เขต 1</a>
     <a href="https://drkulapol.github.io/quickmethod/dashboard.html">วิเคราะห์รายรับ-จ่ายทางบัญชี เขต 1</a>
-    <a href="https://cmi-rh1.github.io/cmi-rh1/#tab=overview&amp;h=11183">วิเคราะห์ CMI รายโรค/กลุ่ม AdjRW &lt; 0.5 เขต 1</a>
+    <a href="https://drkulapol.github.io/cmi-rh1/index.html">วิเคราะห์ CMI รายโรค/กลุ่ม AdjRW &lt; 0.5 เขต 1</a>
   </div>
 </nav>
 <div class="wrap">
@@ -217,14 +218,14 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
 </section>
 
 <nav class="tabs" role="tablist">
-  <button class="on" data-tab="1">ภาพรวมผลประเมิน</button>
-  <button data-tab="2">รายโรงพยาบาล</button>
+  <button class="on" data-tab="2">วิเคราะห์ Planfin รายโรงพยาบาล</button>
   <button data-tab="3">หมวดรายได้</button>
   <button data-tab="4">หมวดค่าใช้จ่าย</button>
+  <button data-tab="1">ภาพรวมผลประเมิน</button>
 </nav>
 
 <!-- TAB 1 -->
-<section class="tab on" id="tab1">
+<section class="tab" id="tab1">
   <div class="grid g3" id="kpis"></div>
   <div class="grid g2" style="margin-top:16px">
     <div class="panel">
@@ -248,7 +249,7 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
 </section>
 
 <!-- TAB 2 -->
-<section class="tab" id="tab2">
+<section class="tab on" id="tab2">
   <div class="panel">
     <div class="catbar" style="margin-bottom:4px">
       <div class="fld"><label for="selHosp">โรงพยาบาล (จากกลุ่มเปรียบเทียบ)</label><select id="selHosp" style="min-width:340px"></select></div>
@@ -258,8 +259,8 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
     <div class="verdict" id="hVerdict"></div>
   </div>
   <div class="grid g2" style="margin-top:16px">
-    <div class="panel"><h2>รายได้สะสมเทียบเป้าหมาย</h2><p class="sub">เส้นประคือเป้าหมายสะสม (แผนทั้งปี × เดือนที่ผ่านไป ÷ 12)</p><div class="chartbox" style="height:260px"><canvas id="chRevLine"></canvas></div></div>
-    <div class="panel"><h2>ค่าใช้จ่ายสะสมเทียบเป้าหมาย</h2><p class="sub">เส้นประคือเป้าหมายสะสม (แผนทั้งปี × เดือนที่ผ่านไป ÷ 12)</p><div class="chartbox" style="height:260px"><canvas id="chExpLine"></canvas></div></div>
+    <div class="panel"><h2>รายได้สะสมเทียบเป้าหมาย <span class="basisnote"></span></h2><p class="sub">เส้นประคือเป้าหมายสะสม (แผนทั้งปี × เดือนที่ผ่านไป ÷ 12)</p><div class="chartbox" style="height:260px"><canvas id="chRevLine"></canvas></div></div>
+    <div class="panel"><h2>ค่าใช้จ่ายสะสมเทียบเป้าหมาย <span class="basisnote"></span></h2><p class="sub">เส้นประคือเป้าหมายสะสม (แผนทั้งปี × เดือนที่ผ่านไป ÷ 12)</p><div class="chartbox" style="height:260px"><canvas id="chExpLine"></canvas></div></div>
   </div>
   <div class="panel" style="margin-top:16px"><h2>รายได้ รายหมวด</h2><p class="sub dplegend"></p><div class="dp" id="dpRev"></div></div>
   <div class="panel" style="margin-top:16px"><h2>ค่าใช้จ่าย รายหมวด</h2><p class="sub dplegend"></p><div class="dp" id="dpExp"></div></div>
@@ -312,7 +313,7 @@ const REVI=CAT.map((c,i)=>c.side==='rev'?i:-1).filter(i=>i>=0);
 const EXPI=CAT.map((c,i)=>c.side==='exp'?i:-1).filter(i=>i>=0);
 const H=D.hosp; const HB={}; H.forEach(h=>HB[h.code]=h);
 const SIZE_ORDER=['A','S','M1','M2','F1','F2','F3'];
-const S={m:D.months.length-1,plan:'p2',thr:5,dir:'two',basis:'assess',mode:'filter',prov:'',size:'',grp:'',focus:null,picked:new Set(),tab:1,hosp:null,revCat:'REV',expCat:'EXP',by:'prov',sortRev:'dev',sortExp:'dev',t1sort:{k:'code',d:1},open:new Set(),openAcc:new Set(),subMode:'m'};
+const S={m:D.months.length-1,plan:'p2',thr:5,dir:'two',basis:'assess',mode:'filter',prov:'',size:'',grp:'',focus:null,picked:new Set(),tab:2,hosp:null,revCat:'REV',expCat:'EXP',by:'prov',sortRev:'dev',sortExp:'dev',t1sort:{k:'code',d:1},open:new Set(),openAcc:new Set(),subMode:'m'};
 const ACC=D.accs;
 /* P04 รายได้ UC ไม่นำมาประเมินในเดือนที่ 1–11 (ประเมินเมื่อครบ 12 เดือน) */
 const EXCL_UNTIL12=['P04'];
@@ -576,6 +577,7 @@ function renderT2(){
       {label:'เป้าหมายสะสม',data:tgt,borderColor:css('--ink2'),borderDash:[5,4],pointRadius:0,borderWidth:1.5}]},
       options:{maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${f1(c.raw)} ลบ.`,afterBody:it=>{const a=it[0].dataIndex;const d=tgt[a]?(act[a]-tgt[a])/tgt[a]*100:null;return d===null?'':`คลาดเคลื่อน ${fP(d)}`;}}}},
       scales:{y:{title:{display:true,text:'ล้านบาท'}}}}});};
+  document.querySelectorAll('.basisnote').forEach(e=>e.textContent=S.basis==='assess'?'(คิดเฉพาะหมวดที่นำมาประเมิน)':'(คิดทุกหมวด)');
   line('chRevLine','REV',css('--rev'));line('chExpLine','EXP',css('--exp'));
   dpLegend();
   const block=(side,tot,title)=>{const idx=side==='rev'?REVI:EXPI;let s=dpHead('หมวด')+dpRow(title,S.basis==='assess'?'เฉพาะหมวดที่ประเมิน':'ทุกหมวด',evalv(h,tot),'total');
