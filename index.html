@@ -282,8 +282,8 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
     </div>
     <div class="hinfo" id="hInfo"></div>
     <div class="medbar">
-      <div class="fld"><label>มัธยฐานกลุ่ม</label><div class="seg" id="segMed"><button data-v="0" class="on">ปิด</button><button data-v="1">แสดง</button></div></div>
-      <div class="medctl" id="medCtl" hidden style="display:contents">
+      <div class="fld"><label>มัธยฐานกลุ่ม</label><div class="seg" id="segMed"><button data-v="0">ปิด</button><button data-v="1" class="on">แสดง</button></div></div>
+      <div class="medctl" id="medCtl" style="display:contents">
       <div class="fld"><label for="selMedBy">มัธยฐานเทียบกับ รพ. ที่</label><select id="selMedBy">
         <option value="grp">อยู่กลุ่มบริการเดียวกัน</option><option value="lvl">ขนาดเดียวกัน (A–F3)</option><option value="prov">อยู่จังหวัดเดียวกัน</option><option value="filter">อยู่ในกลุ่มเปรียบเทียบ (ตัวกรองด้านบน)</option></select></div>
       <div class="fld"><label for="popMin">ประชากร UC ตั้งแต่</label><input id="popMin" type="number" min="0" step="1000" placeholder="ไม่กำหนด"></div>
@@ -366,7 +366,7 @@ const REVI=CAT.map((c,i)=>c.side==='rev'?i:-1).filter(i=>i>=0);
 const EXPI=CAT.map((c,i)=>c.side==='exp'?i:-1).filter(i=>i>=0);
 const H=D.hosp; const HB={}; H.forEach(h=>HB[h.code]=h);
 const SIZE_ORDER=['A','S','M1','M2','F1','F2','F3'];
-const S={m:D.months.length-1,plan:'p2',thr:5,dir:'two',basis:'assess',mode:'filter',prov:'',size:'',grp:'',focus:null,picked:new Set(),tab:2,hosp:null,revCat:'REV',expCat:'EXP',by:'prov',sortRev:'dev',sortExp:'dev',t1sort:{k:'code',d:1},open:new Set(),openAcc:new Set(),subMode:'m',medBy:'grp',popMin:null,popMax:null,nearUnit:'pct',medOn:false,incP04:false,t5grp:'all',t5q:''};
+const S={m:D.months.length-1,plan:'p2',thr:5,dir:'two',basis:'assess',mode:'filter',prov:'',size:'',grp:'',focus:null,picked:new Set(),tab:2,hosp:null,revCat:'REV',expCat:'EXP',by:'prov',sortRev:'dev',sortExp:'dev',t1sort:{k:'code',d:1},open:new Set(),openAcc:new Set(),subMode:'m',medBy:'grp',popMin:null,popMax:null,nearUnit:'pct',medOn:true,incP04:false,t5grp:'all',t5q:''};
 const ACC=D.accs;
 /* P04 รายได้ UC ไม่นำมาประเมินในเดือนที่ 1–11 (ประเมินเมื่อครบ 12 เดือน) */
 const EXCL_UNTIL12=['P04'];
@@ -570,14 +570,15 @@ function track(v,med){
     h+=`<div class="stem bg-${v.st}" style="left:${a}%;width:${b-a}%"></div>`;
     if(Math.abs(v.dev)>RANGE)h+=`<div class="clip t-${v.st}" style="left:${v.dev>0?98:2}%">${v.dev>0?'»':'«'}</div>`;
     else h+=`<div class="dot bg-${v.st}" style="left:${p}%"></div>`;}
+  if(med!==undefined&&med!==null)h+=Math.abs(med)>RANGE?`<div class="mk" style="left:${med>0?96:4}%" title="มัธยฐาน % คลาดของกลุ่ม ${fP(med)} (เกินแกน)"></div>`:`<div class="mk" style="left:${pos(med)}%" title="มัธยฐาน % คลาดของกลุ่ม ${fP(med)}"></div>`;
   return h+'</div>';}
-function dpRow(name,subtxt,v,cls,med){
-  return `<div class="dp-row ${cls||''}" title="${esc(name)}"><div class="nm">${name}${subtxt?`<small>${subtxt}</small>`:''}</div>${track(v,med)}<div class="num c-t">${fM(v.T)}</div><div class="num c-a">${fM(v.A)}</div><div class="num t-${/muted/.test(cls||'')?'none':v.st}"><b>${v.dev===null?LBL[v.st]:fP(v.dev)}</b></div>${med===undefined?'':`<div class="num c-m">${med===null?'–':fM(med)}</div>`}<div class="num t-${/muted/.test(cls||'')||v.st==='pass'?'none':v.st}">${(v.A-v.T)>0.005?'+':''}${fM(v.A-v.T)}</div><div class="num" style="text-align:center">${markOf(v,cls)}</div></div>`;}
+function dpRow(name,subtxt,v,cls,med){const mo=med!==undefined&&med!==null&&typeof med==='object';const mv=mo?med.v:med,md=mo?med.d:undefined;
+  return `<div class="dp-row ${cls||''}" title="${esc(name)}"><div class="nm">${name}${subtxt?`<small>${subtxt}</small>`:''}</div>${track(v,md)}<div class="num c-t">${fM(v.T)}</div><div class="num c-a">${fM(v.A)}</div><div class="num t-${/muted/.test(cls||'')?'none':v.st}"><b>${v.dev===null?LBL[v.st]:fP(v.dev)}</b></div>${med===undefined?'':`<div class="num c-m">${mv===null?'–':fM(mv)}</div>`}<div class="num t-${/muted/.test(cls||'')||v.st==='pass'?'none':v.st}">${(v.A-v.T)>0.005?'+':''}${fM(v.A-v.T)}</div><div class="num" style="text-align:center">${markOf(v,cls)}</div></div>`;}
 function markOf(v,cls){if(v.st==='none')return'<span class="t-none">–</span>';
   if(/muted/.test(cls||''))return'<span class="pill s-none">ไม่ประเมิน</span>';
   return v.st==='pass'?'<span class="pill s-pass">ผ่าน</span>':'<span class="pill s-high">ไม่ผ่าน</span>';}
 function dpLegend(){const t=S.thr;const txt=S.dir==='two'?`ผ่านเมื่อผลจริงอยู่ในช่วง ±${t}% ของเป้าหมาย`:`รายได้ผ่านเมื่อไม่ต่ำกว่าเป้าเกิน ${t}% ค่าใช้จ่ายผ่านเมื่อไม่เกินเป้าเกิน ${t}%`;
-  document.querySelectorAll('.dplegend').forEach(p=>p.innerHTML=`เส้นตั้งคือเป้าหมายสะสม แถบเขียวคือช่วงผ่านเกณฑ์ (${txt}) จุดคือผลจริง หน่วยล้านบาท ค่าที่เกิน ±50% แสดงเป็น « » คลิกแถวที่มี › เพื่อดูบัญชีย่อยในหมวด`);}
+  document.querySelectorAll('.dplegend').forEach(p=>p.innerHTML=`เส้นตั้งคือเป้าหมายสะสม แถบเขียวคือช่วงผ่านเกณฑ์ (${txt}) จุดคือผลจริง หน่วยล้านบาท ค่าที่เกิน ±50% แสดงเป็น « » คลิกแถวที่มี › เพื่อดูบัญชีย่อยในหมวด`+(S.medOn&&S.tab===2?' <span style="color:#7A4FBF;font-weight:600">◆ คือมัธยฐาน % คลาดของ รพ. ในกลุ่ม</span> (ส่วนคอลัมน์มัธยฐานกลุ่มเป็นผลจริงสะสม ล้านบาท)':''));}
 
 function accList(h,cid){const ci=CAT.findIndex(c=>c.id===cid);const pi=S.plan==='p2'?2:1;
   return h.x.filter(r=>ACC[r[0]].g===ci).map(r=>{const v=evalAT(r[3+S.m],r[pi],S.m,CAT[ci].side);return{a:ACC[r[0]],ai:r[0],v};})
@@ -588,7 +589,7 @@ function subPanel(h,cid,withMed){const L=accList(h,cid);const ci=CAT.findIndex(c
   const tot=evalv(h,cid);const gap=tot.A-tot.T;
   return `<div class="dp-sub"><div class="cap">${esc(h.code)} ${esc(short(h.name))} หมวด ${c.id} ${esc(c.name)} มี ${L.length} บัญชีย่อย ผลต่างรวม ${gap>0?'+':''}${fM(gap)} ลบ. ${gap>=0?'หมวดนี้สูงกว่าแผน จึงเรียงบัญชีที่สูงกว่าแผนมากที่สุดขึ้นก่อน':'หมวดนี้ต่ำกว่าแผน จึงเรียงบัญชีที่ต่ำกว่าแผนมากที่สุดขึ้นก่อน'}</div>`+subChartHtml(h,cid)+
     L.map(x=>{const ka=`${h.code}|${cid}|${x.ai}`;const op=S.openAcc.has(ka);
-      return dpRow(`<span class="caret">›</span>${esc(x.a.n)}`,x.v.T<0||x.v.A<0?'บัญชีรายการหัก':'',x.v,`${c.assess?'':'muted '}exp${op?' open':''}" data-a="${ka}`,P?medAcc(P,ci,x.ai):undefined)+(op?subChartHtml(h,cid,x.ai):'');}).join('')+'</div>';}
+      return dpRow(`<span class="caret">›</span>${esc(x.a.n)}`,x.v.T<0||x.v.A<0?'บัญชีรายการหัก':'',x.v,`${c.assess?'':'muted '}exp${op?' open':''}" data-a="${ka}`,P?{v:medAcc(P,ci,x.ai),d:medAccDev(P,ci,x.ai)}:undefined)+(op?subChartHtml(h,cid,x.ai):'');}).join('')+'</div>';}
 function expRow(h,cid,nameHtml,subtxt,v,cls,med){const k=h.code+'|'+cid;const open=S.open.has(k);
   return dpRow(`<span class="caret">›</span>${nameHtml}`,subtxt,v,`${cls||''} exp${open?' open':''}" data-x="${k}`,med)+(open?subPanel(h,cid,med!==undefined):'');}
 const SC={};
@@ -631,6 +632,8 @@ function peers(h){let L=S.medBy==='filter'?group():H.filter(x=>x[S.medBy]===h[S.
   return L;}
 function median(a){a=a.filter(v=>v!==null&&v!==undefined&&isFinite(v)).sort((x,y)=>x-y);if(!a.length)return null;const k=a.length>>1;return a.length%2?a[k]:(a[k-1]+a[k])/2;}
 function medSeries(P,key,ai,ms){return ms.map((_,i)=>{const m=median(P.map(p=>{if(ai!=null){const r=p.x.find(r=>r[0]===ai);return r?r[3+i]:0;}return amt(p,key,i).A;}));return m===null?null:m/1e6;});}
+function medDev(P,key){const m=median(P.map(p=>evalv(p,key).dev));return m===null?null:trunc2(m);}
+function medAccDev(P,ci,ai){const pi=S.plan==='p2'?2:1;const m=median(P.map(p=>{const r=p.x.find(r=>r[0]===ai);return r?evalAT(r[3+S.m],r[pi],S.m,CAT[ci].side).dev:null;}));return m===null?null:trunc2(m);}
 function medCat(P,key){return median(P.map(p=>evalv(p,key).A));}
 function medAcc(P,ci,ai){return median(P.map(p=>{const r=p.x.find(r=>r[0]===ai);return r?r[3+S.m]:0;}));}
 function medDesc(h,P){const by={grp:`กลุ่มบริการ ${h.grp}`,lvl:`ขนาด ${h.lvl}`,prov:`จังหวัด${h.prov}`,filter:'กลุ่มเปรียบเทียบตามตัวกรอง'}[S.medBy];
@@ -666,7 +669,7 @@ function renderT2(){
   document.querySelectorAll('.basisnote').forEach(e=>e.textContent=S.basis==='assess'?'(คิดเฉพาะหมวดที่นำมาประเมิน)':'(คิดทุกหมวด)');
   line('chRevLine','REV',css('--rev'));line('chExpLine','EXP',css('--exp'));
   dpLegend();
-  const P=S.medOn?peers(h):null;if(P)renderMedInfo(h);['dpRev','dpExp'].forEach(i=>$(i).classList.toggle('med',!!P));const MC=k=>P?medCat(P,k):undefined;
+  const P=S.medOn?peers(h):null;if(P)renderMedInfo(h);['dpRev','dpExp'].forEach(i=>$(i).classList.toggle('med',!!P));const MC=k=>P?{v:medCat(P,k),d:medDev(P,k)}:undefined;
   const block=(side,tot,title)=>{const idx=side==='rev'?REVI:EXPI;let s=dpHead('หมวด',!!P)+dpRow(title,S.basis==='assess'?'เฉพาะหมวดที่ประเมิน':'ทุกหมวด',evalv(h,tot),'total',MC(tot));
     for(const i of idx){const v=evalv(h,CAT[i].id);const muted=!CAT[i].assess||(v.st==='none');s+=expRow(h,CAT[i].id,`${CAT[i].id} ${esc(CAT[i].name)}`,CAT[i].assess?'':notAssessTxt(CAT[i]),v,muted?'muted':'',MC(CAT[i].id));}
     return s;};
