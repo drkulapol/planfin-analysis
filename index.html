@@ -108,6 +108,29 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
 .track .clip{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:12px;font-weight:700}
 .bg-pass{background:var(--pass)} .bg-low{background:var(--low)} .bg-high{background:var(--high)} .bg-noplan{background:var(--high)} .bg-none{background:var(--na)}
 @media (max-width:760px){.dp-head,.dp-row{grid-template-columns:1fr 60px 76px 68px;}.dp-head .h-t,.dp-head .h-a,.dp-row .c-t,.dp-row .c-a{display:none}.dp-head .h-n{display:none}.dp-row .nm{grid-column:1/-1}}
+.dp.med .dp-head,.dp.med .dp-row{grid-template-columns:minmax(170px,1.3fr) minmax(200px,2fr) 88px 88px 74px 84px 88px 74px}
+@media (max-width:760px){.dp.med .dp-head,.dp.med .dp-row{grid-template-columns:1fr 58px 62px 70px 64px}}
+.num.c-m{color:#7A4FBF;font-weight:600}
+.track .mk{position:absolute;top:50%;width:11px;height:11px;transform:translate(-50%,-50%) rotate(45deg);background:var(--panel);border:2px solid #7A4FBF;z-index:2}
+.medbar{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.medbar input[type=number]{width:120px}
+.medbar .linkbtn{min-height:38px}
+.medbar .dlbtn{min-height:38px}
+.t5cards{grid-template-columns:repeat(4,1fr)}
+@media (max-width:900px){.t5cards{grid-template-columns:1fr 1fr}}
+.t5card{cursor:pointer;border-top:4px solid var(--c)}
+.t5card.on{box-shadow:0 0 0 2px var(--c) inset}
+.t5card .big{font-size:34px;font-weight:700;line-height:1.1;color:var(--c)}
+.t5card .big small{font-size:15px;color:var(--ink2);font-weight:500;margin-left:6px}
+.t5list{margin-top:16px}
+.t5list h2 .cnt{display:inline-block;background:var(--c);color:#fff;border-radius:999px;font-size:13px;padding:1px 10px;margin-left:8px;vertical-align:2px}
+.t5list{border-left:4px solid var(--c)}
+.chk{display:flex;align-items:center;gap:7px;min-height:38px;font-size:14px;color:var(--ink);cursor:pointer}
+.chk input{width:18px;height:18px;accent-color:var(--blue)}
+.medctl[hidden]{display:none!important}
+.medinfo{font-size:13px;color:var(--ink2);width:100%}
+.medinfo summary{cursor:pointer;color:var(--ink)}
+.medinfo .lst{margin-top:4px;line-height:1.7}
 .dp-row.exp{cursor:pointer}
 .dp-row.exp:hover{background:var(--soft)}
 .caret{display:inline-block;width:16px;color:var(--blue);font-weight:700;transition:transform .15s}
@@ -201,6 +224,7 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
     <div class="fld"><label for="inThr">เกณฑ์ผ่าน (± %)</label><input id="inThr" type="number" min="0" max="100" step="0.5" value="5"></div>
     <div class="fld"><label>ทิศทางเกณฑ์</label><div class="seg" id="segDir"><button data-v="two" class="on">เบี่ยงได้ทั้งสองทาง</button><button data-v="one">ทางเดียว</button></div></div>
     <div class="fld"><label>ยอดรวมที่ใช้ประเมิน</label><div class="seg" id="segBasis"><button data-v="assess" class="on">เฉพาะหมวดที่ประเมิน</button><button data-v="all">ทุกหมวด</button></div></div>
+    <div class="fld"><label for="chkP04">P04 รายได้ UC (เดือนที่ 1–11)</label><label class="chk"><input type="checkbox" id="chkP04"> นับรวมในฝั่งรายได้</label></div>
   </div>
   <div class="divider"></div>
   <div class="row">
@@ -222,6 +246,7 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
   <button data-tab="3">หมวดรายได้</button>
   <button data-tab="4">หมวดค่าใช้จ่าย</button>
   <button data-tab="1">ภาพรวมผลประเมิน</button>
+  <button data-tab="5">สรุปกลุ่มผลลัพธ์ของแผน</button>
 </nav>
 
 <!-- TAB 1 -->
@@ -256,14 +281,26 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
       <div class="dlbar"><span>ดาวน์โหลด</span><button class="dlbtn" data-dl="xlsx" data-tab="2">Excel</button><button class="dlbtn" data-dl="pdf" data-tab="2">PDF</button></div>
     </div>
     <div class="hinfo" id="hInfo"></div>
+    <div class="medbar">
+      <div class="fld"><label>มัธยฐานกลุ่ม</label><div class="seg" id="segMed"><button data-v="0" class="on">ปิด</button><button data-v="1">แสดง</button></div></div>
+      <div class="medctl" id="medCtl" hidden style="display:contents">
+      <div class="fld"><label for="selMedBy">มัธยฐานเทียบกับ รพ. ที่</label><select id="selMedBy">
+        <option value="grp">อยู่กลุ่มบริการเดียวกัน</option><option value="lvl">ขนาดเดียวกัน (A–F3)</option><option value="prov">อยู่จังหวัดเดียวกัน</option><option value="filter">อยู่ในกลุ่มเปรียบเทียบ (ตัวกรองด้านบน)</option></select></div>
+      <div class="fld"><label for="popMin">ประชากร UC ตั้งแต่</label><input id="popMin" type="number" min="0" step="1000" placeholder="ไม่กำหนด"></div>
+      <div class="fld"><label for="popMax">ถึง</label><input id="popMax" type="number" min="0" step="1000" placeholder="ไม่กำหนด"></div>
+      <div class="fld"><label for="nearVal">ใกล้เคียง รพ. นี้ ±</label><div style="display:flex;gap:6px"><input id="nearVal" type="number" min="0" value="25" style="width:90px"><div class="seg" id="segNear"><button data-v="pct" class="on">%</button><button data-v="abs">คน</button></div><button class="dlbtn" id="popNear">ใช้ช่วงนี้</button></div></div>
+      <button class="linkbtn" id="popClear">ล้างช่วงประชากร</button>
+      <div class="medinfo" id="medInfo"></div>
+      </div>
+    </div>
     <div class="verdict" id="hVerdict"></div>
   </div>
   <div class="grid g2" style="margin-top:16px">
     <div class="panel"><h2>รายได้สะสมเทียบเป้าหมาย <span class="basisnote"></span></h2><p class="sub">เส้นประคือเป้าหมายสะสม (แผนทั้งปี × เดือนที่ผ่านไป ÷ 12)</p><div class="chartbox" style="height:260px"><canvas id="chRevLine"></canvas></div></div>
     <div class="panel"><h2>ค่าใช้จ่ายสะสมเทียบเป้าหมาย <span class="basisnote"></span></h2><p class="sub">เส้นประคือเป้าหมายสะสม (แผนทั้งปี × เดือนที่ผ่านไป ÷ 12)</p><div class="chartbox" style="height:260px"><canvas id="chExpLine"></canvas></div></div>
   </div>
-  <div class="panel" style="margin-top:16px"><h2>รายได้ รายหมวด</h2><p class="sub dplegend"></p><div class="dp" id="dpRev"></div></div>
-  <div class="panel" style="margin-top:16px"><h2>ค่าใช้จ่าย รายหมวด</h2><p class="sub dplegend"></p><div class="dp" id="dpExp"></div></div>
+  <div class="panel" style="margin-top:16px"><h2>รายได้ รายหมวด</h2><p class="sub dplegend"></p><div class="dp med" id="dpRev"></div></div>
+  <div class="panel" style="margin-top:16px"><h2>ค่าใช้จ่าย รายหมวด</h2><p class="sub dplegend"></p><div class="dp med" id="dpExp"></div></div>
 </section>
 
 <!-- TAB 3 -->
@@ -294,6 +331,22 @@ tbody tr.focus:hover td{background:var(--blue-soft)}
   <div class="panel" style="margin-top:16px"><h2>ทุกหมวดค่าใช้จ่ายในมุมเดียว</h2><p class="sub">ตัวเลขคือ % คลาดเคลื่อนจากเป้าหมาย สีบอกผลประเมิน คลิกหัวคอลัมน์เพื่อเลือกหมวด คลิกช่องตัวเลขเพื่อดูบัญชีย่อยของ รพ. นั้น</p><div class="tbl" style="max-height:600px"><table class="heat" id="heatExp"></table></div></div>
 </section>
 
+<!-- TAB 5 -->
+<section class="tab" id="tab5">
+  <div class="panel">
+    <div class="catbar" style="margin-bottom:6px">
+      <div class="fld"><label for="selT5">แสดงกลุ่มผลลัพธ์</label><select id="selT5" style="min-width:260px">
+        <option value="all">ทุกกลุ่ม</option><option value="both">ผ่านทั้งแผนรับและแผนจ่าย</option><option value="rev">ผ่านเฉพาะแผนรับ</option><option value="exp">ผ่านเฉพาะแผนจ่าย</option><option value="none">ไม่ผ่านทั้งแผนรับและแผนจ่าย</option></select></div>
+      <div class="fld"><label for="inT5">ค้นหา รพ.</label><input id="inT5" type="text" placeholder="รหัส ชื่อ หรือจังหวัด" style="min-width:220px"></div>
+      <div class="fld"><label>P04 รายได้ UC (เดือนที่ 1–11)</label><label class="chk"><input type="checkbox" id="chkP04b"> นับรวมในฝั่งรายได้</label></div>
+      <div class="dlbar"><span>ดาวน์โหลด</span><button class="dlbtn" data-dl="xlsx" data-tab="5">Excel</button><button class="dlbtn" data-dl="pdf" data-tab="5">PDF</button></div>
+    </div>
+    <p class="sub" id="t5sub" style="margin:4px 0 0"></p>
+  </div>
+  <div class="grid t5cards" id="t5cards" style="margin-top:16px"></div>
+  <div id="t5lists"></div>
+</section>
+
 <p class="note" id="footnote"></p>
 <footer class="credit">
   <div class="c1">ออกแบบและพัฒนาโดย</div>
@@ -313,11 +366,11 @@ const REVI=CAT.map((c,i)=>c.side==='rev'?i:-1).filter(i=>i>=0);
 const EXPI=CAT.map((c,i)=>c.side==='exp'?i:-1).filter(i=>i>=0);
 const H=D.hosp; const HB={}; H.forEach(h=>HB[h.code]=h);
 const SIZE_ORDER=['A','S','M1','M2','F1','F2','F3'];
-const S={m:D.months.length-1,plan:'p2',thr:5,dir:'two',basis:'assess',mode:'filter',prov:'',size:'',grp:'',focus:null,picked:new Set(),tab:2,hosp:null,revCat:'REV',expCat:'EXP',by:'prov',sortRev:'dev',sortExp:'dev',t1sort:{k:'code',d:1},open:new Set(),openAcc:new Set(),subMode:'m'};
+const S={m:D.months.length-1,plan:'p2',thr:5,dir:'two',basis:'assess',mode:'filter',prov:'',size:'',grp:'',focus:null,picked:new Set(),tab:2,hosp:null,revCat:'REV',expCat:'EXP',by:'prov',sortRev:'dev',sortExp:'dev',t1sort:{k:'code',d:1},open:new Set(),openAcc:new Set(),subMode:'m',medBy:'grp',popMin:null,popMax:null,nearUnit:'pct',medOn:false,incP04:false,t5grp:'all',t5q:''};
 const ACC=D.accs;
 /* P04 รายได้ UC ไม่นำมาประเมินในเดือนที่ 1–11 (ประเมินเมื่อครบ 12 เดือน) */
 const EXCL_UNTIL12=['P04'];
-const exclNow=c=>EXCL_UNTIL12.includes(c.id)&&D.months[S.m].n<12;
+const exclNow=c=>EXCL_UNTIL12.includes(c.id)&&D.months[S.m].n<12&&!S.incP04;
 CAT.forEach(c=>{const base=c.assess;Object.defineProperty(c,'assess',{get(){return base&&!exclNow(c);}});});
 const notAssessTxt=c=>exclNow(c)?'ไม่นำมาประเมินในเดือนที่ 1–11':'ไม่นำมาประเมิน';
 const $=id=>document.getElementById(id);
@@ -406,6 +459,20 @@ function initControls(){
   $('pickNone').onclick=()=>{S.picked.clear();renderPick();render();};
   $('pickSearch').oninput=renderPick;
   document.querySelector('.tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;goTab(+b.dataset.tab);});
+  $('chkP04').onchange=e=>{S.incP04=e.target.checked;['chkP04','chkP04b'].forEach(i=>$(i).checked=S.incP04);fillCatSelects();render();};
+  $('chkP04b').onchange=e=>{$('chkP04').checked=e.target.checked;$('chkP04').onchange({target:$('chkP04')});};
+  $('selT5').onchange=e=>{S.t5grp=e.target.value;renderT5();};
+  $('inT5').oninput=e=>{S.t5q=e.target.value.trim();renderT5();};
+  $('segMed').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...$('segMed').children].forEach(x=>x.classList.toggle('on',x===b));S.medOn=b.dataset.v==='1';$('medCtl').hidden=!S.medOn;Object.keys(SC).forEach(k=>{SC[k].destroy();delete SC[k];});renderT2();drawSubCharts();});
+  $('selMedBy').onchange=e=>{S.medBy=e.target.value;renderT2();drawSubCharts();};
+  const popIn=()=>{const a=$('popMin').value,b=$('popMax').value;S.popMin=a===''?null:+a;S.popMax=b===''?null:+b;renderT2();drawSubCharts();};
+  $('popMin').oninput=popIn;$('popMax').oninput=popIn;
+  $('popClear').onclick=()=>{$('popMin').value='';$('popMax').value='';popIn();};
+  const applyNear=()=>{const h=HB[S.hosp];const v=parseFloat($('nearVal').value);if(!h||!h.pop||isNaN(v)||v<0)return;
+    const d=S.nearUnit==='pct'?h.pop*v/100:v;$('popMin').value=Math.max(0,Math.round(h.pop-d));$('popMax').value=Math.round(h.pop+d);popIn();};
+  $('popNear').onclick=applyNear;$('nearVal').addEventListener('keydown',e=>{if(e.key==='Enter')applyNear();});
+  $('segNear').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...$('segNear').children].forEach(x=>x.classList.toggle('on',x===b));S.nearUnit=b.dataset.v;
+    if(S.nearUnit==='abs'&&+$('nearVal').value<=100)$('nearVal').value=2000;if(S.nearUnit==='pct'&&+$('nearVal').value>100)$('nearVal').value=25;});
   $('selHosp').onchange=e=>{S.hosp=e.target.value;renderT2();drawSubCharts();};
   $('selRevCat').onchange=e=>{S.revCat=e.target.value;renderT3();};
   $('selExpCat').onchange=e=>{S.expCat=e.target.value;renderT4();};
@@ -493,9 +560,9 @@ $('tbl1').addEventListener('click',e=>{const th=e.target.closest('th');if(th){co
 
 /* ---------- dot plot ---------- */
 const RANGE=50;
-function dpHead(first){const ticks=[-50,-25,0,25,50];
-  return `<div class="dp-head"><div class="h-n">${first}</div><div class="scale">${ticks.map(v=>`<span style="left:${(v+RANGE)/(2*RANGE)*100}%">${v>0?'+':''}${v}%</span>`).join('')}</div><div class="num h-t">เป้าหมาย</div><div class="num h-a">ผลจริง</div><div class="num">% คลาด</div><div class="num">ต่างจากเป้า</div><div class="num" style="text-align:center">ผลประเมิน</div></div>`;}
-function track(v){
+function dpHead(first,med){const ticks=[-50,-25,0,25,50];
+  return `<div class="dp-head"><div class="h-n">${first}</div><div class="scale">${ticks.map(v=>`<span style="left:${(v+RANGE)/(2*RANGE)*100}%">${v>0?'+':''}${v}%</span>`).join('')}</div><div class="num h-t">เป้าหมาย</div><div class="num h-a">ผลจริง</div><div class="num">% คลาด</div>${med?'<div class="num c-m" title="มัธยฐานผลจริงสะสมของ รพ. ในกลุ่ม (ล้านบาท)">มัธยฐานกลุ่ม</div>':''}<div class="num">ต่างจากเป้า</div><div class="num" style="text-align:center">ผลประเมิน</div></div>`;}
+function track(v,med){
   const pos=x=>(Math.max(-RANGE,Math.min(RANGE,x))+RANGE)/(2*RANGE)*100;
   const t=S.thr;let lo=-t,hi=t;if(S.dir==='one'){if(v.side==='rev')hi=RANGE;else lo=-RANGE;}
   let h=`<div class="track"><div class="axis"></div><div class="band" style="left:${pos(lo)}%;width:${pos(hi)-pos(lo)}%"></div><div class="tgt" style="left:50%"></div>`;
@@ -504,8 +571,8 @@ function track(v){
     if(Math.abs(v.dev)>RANGE)h+=`<div class="clip t-${v.st}" style="left:${v.dev>0?98:2}%">${v.dev>0?'»':'«'}</div>`;
     else h+=`<div class="dot bg-${v.st}" style="left:${p}%"></div>`;}
   return h+'</div>';}
-function dpRow(name,subtxt,v,cls){
-  return `<div class="dp-row ${cls||''}" title="${esc(name)}"><div class="nm">${name}${subtxt?`<small>${subtxt}</small>`:''}</div>${track(v)}<div class="num c-t">${fM(v.T)}</div><div class="num c-a">${fM(v.A)}</div><div class="num t-${/muted/.test(cls||'')?'none':v.st}"><b>${v.dev===null?LBL[v.st]:fP(v.dev)}</b></div><div class="num t-${/muted/.test(cls||'')||v.st==='pass'?'none':v.st}">${(v.A-v.T)>0.005?'+':''}${fM(v.A-v.T)}</div><div class="num" style="text-align:center">${markOf(v,cls)}</div></div>`;}
+function dpRow(name,subtxt,v,cls,med){
+  return `<div class="dp-row ${cls||''}" title="${esc(name)}"><div class="nm">${name}${subtxt?`<small>${subtxt}</small>`:''}</div>${track(v,med)}<div class="num c-t">${fM(v.T)}</div><div class="num c-a">${fM(v.A)}</div><div class="num t-${/muted/.test(cls||'')?'none':v.st}"><b>${v.dev===null?LBL[v.st]:fP(v.dev)}</b></div>${med===undefined?'':`<div class="num c-m">${med===null?'–':fM(med)}</div>`}<div class="num t-${/muted/.test(cls||'')||v.st==='pass'?'none':v.st}">${(v.A-v.T)>0.005?'+':''}${fM(v.A-v.T)}</div><div class="num" style="text-align:center">${markOf(v,cls)}</div></div>`;}
 function markOf(v,cls){if(v.st==='none')return'<span class="t-none">–</span>';
   if(/muted/.test(cls||''))return'<span class="pill s-none">ไม่ประเมิน</span>';
   return v.st==='pass'?'<span class="pill s-pass">ผ่าน</span>':'<span class="pill s-high">ไม่ผ่าน</span>';}
@@ -515,15 +582,15 @@ function dpLegend(){const t=S.thr;const txt=S.dir==='two'?`ผ่านเมื
 function accList(h,cid){const ci=CAT.findIndex(c=>c.id===cid);const pi=S.plan==='p2'?2:1;
   return h.x.filter(r=>ACC[r[0]].g===ci).map(r=>{const v=evalAT(r[3+S.m],r[pi],S.m,CAT[ci].side);return{a:ACC[r[0]],ai:r[0],v};})
     ;}
-function subPanel(h,cid){const L=accList(h,cid);const c=CAT.find(x=>x.id===cid);
+function subPanel(h,cid,withMed){const L=accList(h,cid);const ci=CAT.findIndex(c=>c.id===cid);const P=withMed?peers(h):null;const c=CAT.find(x=>x.id===cid);
   const tot0=evalv(h,cid);const dir=(tot0.A-tot0.T)>=0?-1:1;L.sort((p,q)=>dir*((p.v.A-p.v.T)-(q.v.A-q.v.T)));
   if(!L.length)return `<div class="dp-sub"><div class="cap">ไม่มีบัญชีย่อยที่มีแผนหรือผลในหมวดนี้</div></div>`;
   const tot=evalv(h,cid);const gap=tot.A-tot.T;
   return `<div class="dp-sub"><div class="cap">${esc(h.code)} ${esc(short(h.name))} หมวด ${c.id} ${esc(c.name)} มี ${L.length} บัญชีย่อย ผลต่างรวม ${gap>0?'+':''}${fM(gap)} ลบ. ${gap>=0?'หมวดนี้สูงกว่าแผน จึงเรียงบัญชีที่สูงกว่าแผนมากที่สุดขึ้นก่อน':'หมวดนี้ต่ำกว่าแผน จึงเรียงบัญชีที่ต่ำกว่าแผนมากที่สุดขึ้นก่อน'}</div>`+subChartHtml(h,cid)+
     L.map(x=>{const ka=`${h.code}|${cid}|${x.ai}`;const op=S.openAcc.has(ka);
-      return dpRow(`<span class="caret">›</span>${esc(x.a.n)}`,x.v.T<0||x.v.A<0?'บัญชีรายการหัก':'',x.v,`${c.assess?'':'muted '}exp${op?' open':''}" data-a="${ka}`)+(op?subChartHtml(h,cid,x.ai):'');}).join('')+'</div>';}
-function expRow(h,cid,nameHtml,subtxt,v,cls){const k=h.code+'|'+cid;const open=S.open.has(k);
-  return dpRow(`<span class="caret">›</span>${nameHtml}`,subtxt,v,`${cls||''} exp${open?' open':''}" data-x="${k}`)+(open?subPanel(h,cid):'');}
+      return dpRow(`<span class="caret">›</span>${esc(x.a.n)}`,x.v.T<0||x.v.A<0?'บัญชีรายการหัก':'',x.v,`${c.assess?'':'muted '}exp${op?' open':''}" data-a="${ka}`,P?medAcc(P,ci,x.ai):undefined)+(op?subChartHtml(h,cid,x.ai):'');}).join('')+'</div>';}
+function expRow(h,cid,nameHtml,subtxt,v,cls,med){const k=h.code+'|'+cid;const open=S.open.has(k);
+  return dpRow(`<span class="caret">›</span>${nameHtml}`,subtxt,v,`${cls||''} exp${open?' open':''}" data-x="${k}`,med)+(open?subPanel(h,cid,med!==undefined):'');}
 const SC={};
 function scId(h,cid,ai){return 'sc_'+h.code+'_'+cid+(ai!=null?'_a'+ai:'');}
 function subChartHtml(h,cid,ai){const k=h.code+'|'+cid+(ai!=null?'|'+ai:'');return `<div class="subchart${ai!=null?' acc':''}"><div class="top"><span>${ai!=null?esc(ACC[ai].n)+' ':''}ผลจริงเทียบเป้าหมาย ${S.subMode==='c'?'สะสม':'รายเดือน'} (ล้านบาท)</span><div class="seg subseg" data-k="${k}"><button data-v="m" class="${S.subMode==='m'?'on':''}">รายเดือน</button><button data-v="c" class="${S.subMode==='c'?'on':''}">สะสม</button></div></div><div class="box"><canvas id="${scId(h,cid,ai)}" data-k="${k}"></canvas></div></div>`;}
@@ -534,10 +601,12 @@ function drawSubCharts(){baseOpts();document.querySelectorAll('canvas[id^="sc_"]
   else{cum=ms.map((_,i)=>h.a[ci][i]/1e6);P=h[S.plan][ci]/1e6;}const col=css(CAT[ci].side==='rev'?'--rev':'--exp');
   let act,tgt;if(S.subMode==='c'){act=cum;tgt=ms.map(m=>P*m.n/12);}else{act=cum.map((v,i)=>i?v-cum[i-1]:v);tgt=ms.map(()=>P/12);}
   const devs=act.map((a,i)=>Math.abs(tgt[i])>1e-6?trunc2((a-tgt[i])/Math.abs(tgt[i])*100):null);
+  let medDs=[];if(S.medOn&&cv.closest('.dp.med')){const mc=medSeries(peers(h),cid,ais!==undefined?+ais:null,ms);const mv=S.subMode==='c'?mc:mc.map((v,i)=>v===null?null:(i?(mc[i-1]===null?null:v-mc[i-1]):v));
+    medDs=[{type:'line',label:S.subMode==='c'?'มัธยฐานกลุ่ม (สะสม)':'มัธยฐานกลุ่ม (รายเดือน)',data:mv,borderColor:'#7A4FBF',backgroundColor:'#7A4FBF',borderWidth:2,pointRadius:3,pointStyle:'rectRot',tension:.2,order:0}];}
   SC[cv.id]=new Chart(cv,{data:{labels:ms.map(m=>m.short),datasets:[
     S.subMode==='c'?{type:'line',label:'ผลจริงสะสม',data:act,borderColor:col,backgroundColor:col,tension:.2,pointRadius:3,order:1}
       :{type:'bar',label:'ผลจริงรายเดือน',data:act,backgroundColor:act.map((a,i)=>{const d=devs[i];if(d===null)return css('--na');const t=S.thr;const ok=S.dir==='two'?Math.abs(d)<=t:(CAT[ci].side==='rev'?d>=-t:d<=t);return ok?css('--pass'):(d<0?css('--low'):css('--high'));}),order:2},
-    {type:'line',label:S.subMode==='c'?'เป้าหมายสะสม':'เป้าหมายต่อเดือน (แผนทั้งปี ÷ 12)',data:tgt,borderColor:css('--ink'),borderDash:[5,4],pointRadius:0,borderWidth:1.5,order:0}]},
+    {type:'line',label:S.subMode==='c'?'เป้าหมายสะสม':'เป้าหมายต่อเดือน (แผนทั้งปี ÷ 12)',data:tgt,borderColor:css('--ink'),borderDash:[5,4],pointRadius:0,borderWidth:1.5,order:0},...medDs]},
     options:{maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{position:'bottom',labels:{boxWidth:12}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.raw.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})} ลบ.`,afterBody:it=>{const d=devs[it[0].dataIndex];return d===null?'':`คลาดเคลื่อน ${fP(d)}`;}}}},
       scales:{y:{ticks:{callback:v=>v.toLocaleString('th-TH')}}}}});});}
@@ -552,8 +621,24 @@ function toggleExp(e){if(e.target.closest('.subchart'))return true;
   const k=r.dataset.x;if(S.open.has(k))S.open.delete(k);else S.open.add(k);
   const [code,cid]=k.split('|');const h=HB[code];const was=r.nextElementSibling;
   if(was&&was.classList.contains('dp-sub'))was.remove();
-  r.classList.toggle('open',S.open.has(k));if(S.open.has(k))r.insertAdjacentHTML('afterend',subPanel(h,cid));drawSubCharts();return true;}
+  r.classList.toggle('open',S.open.has(k));if(S.open.has(k))r.insertAdjacentHTML('afterend',subPanel(h,cid,!!r.closest('.dp.med')));drawSubCharts();return true;}
 ['dpRev','dpExp'].forEach(id=>$(id).addEventListener('click',toggleExp));
+
+/* ---------- มัธยฐานกลุ่ม ---------- */
+function peers(h){let L=S.medBy==='filter'?group():H.filter(x=>x[S.medBy]===h[S.medBy]);
+  L=L.filter(x=>x.code!==h.code);
+  if(S.popMin!=null||S.popMax!=null)L=L.filter(x=>x.pop!=null&&(S.popMin==null||x.pop>=S.popMin)&&(S.popMax==null||x.pop<=S.popMax));
+  return L;}
+function median(a){a=a.filter(v=>v!==null&&v!==undefined&&isFinite(v)).sort((x,y)=>x-y);if(!a.length)return null;const k=a.length>>1;return a.length%2?a[k]:(a[k-1]+a[k])/2;}
+function medSeries(P,key,ai,ms){return ms.map((_,i)=>{const m=median(P.map(p=>{if(ai!=null){const r=p.x.find(r=>r[0]===ai);return r?r[3+i]:0;}return amt(p,key,i).A;}));return m===null?null:m/1e6;});}
+function medCat(P,key){return median(P.map(p=>evalv(p,key).A));}
+function medAcc(P,ci,ai){return median(P.map(p=>{const r=p.x.find(r=>r[0]===ai);return r?r[3+S.m]:0;}));}
+function medDesc(h,P){const by={grp:`กลุ่มบริการ ${h.grp}`,lvl:`ขนาด ${h.lvl}`,prov:`จังหวัด${h.prov}`,filter:'กลุ่มเปรียบเทียบตามตัวกรอง'}[S.medBy];
+  const pr=S.popMin==null&&S.popMax==null?'':` ประชากร UC ${S.popMin!=null?S.popMin.toLocaleString('th-TH'):'0'}–${S.popMax!=null?S.popMax.toLocaleString('th-TH'):'ไม่จำกัด'}`;
+  return `${by}${pr} (${P.length} แห่ง ไม่นับ รพ. ที่เลือก)`;}
+function renderMedInfo(h){const P=peers(h);
+  $('medInfo').innerHTML=P.length?`<details><summary>มัธยฐานผลจริงสะสม (ล้านบาท) ของ ${esc(medDesc(h,P))} ดูรายชื่อ</summary><div class="lst">${[...P].sort((a,b)=>(a.pop||0)-(b.pop||0)).map(x=>`${x.code} ${esc(short(x.name))} <span style="color:var(--ink2)">(UC ${x.pop?x.pop.toLocaleString('th-TH'):'–'})</span>`).join(' · ')}</div></details>`
+    :`<span class="t-low">ไม่มี รพ. อื่นใน${esc(medDesc(h,P).replace(/ \(0 แห่ง.*$/,''))} ลองขยายช่วงประชากร UC หรือเปลี่ยนกลุ่ม</span>`;}
 
 /* ---------- TAB 2 ---------- */
 function renderT2(){
@@ -565,23 +650,25 @@ function renderT2(){
   $('selHosp').innerHTML=list.map(h=>`<option value="${h.code}"${h.code===S.hosp?' selected':''}>${h.code} ${esc(short(h.name))} (${esc(h.prov)})</option>`).join('');
   const h=HB[S.hosp];const o=overall(h);
   $('hInfo').innerHTML=`<span>จังหวัด <b>${esc(h.prov)}</b></span><span>ประเภท <b>${esc(h.type)} ${esc(h.lvl)}</b></span><span>กลุ่มบริการ <b>${esc(h.grp)}</b></span><span>เตียง <b>${h.bed??'–'}</b></span><span>ประชากร UC <b>${h.pop?h.pop.toLocaleString('th-TH'):'–'}</b></span>`;
-  const vb=(t,v)=>`<div class="vbox"><div class="v1">${t}</div><div class="v2 t-${v.st}">${fP(v.dev)}</div><span class="pill s-${v.st}">${LBL[v.st]}</span> <span style="font-size:13px;color:var(--ink2)">${fM(v.A)} จากเป้า ${fM(v.T)} ลบ.</span></div>`;
+  const P0=S.medOn?peers(h):null;const vb=(t,v,k)=>{const md=P0?medCat(P0,k):undefined;return `<div class="vbox"><div class="v1">${t}</div><div class="v2 t-${v.st}">${fP(v.dev)} ${md===undefined?'':`<span style="font-size:13px;font-weight:600;color:#7A4FBF">มัธยฐานกลุ่ม ${md===null?'–':fM(md)} ลบ.</span>`}</div><span class="pill s-${v.st}">${LBL[v.st]}</span> <span style="font-size:13px;color:var(--ink2)">${fM(v.A)} จากเป้า ${fM(v.T)} ลบ.</span></div>`;};
   let ni=0,niT=0;for(const i of REVI){ni+=h.a[i][S.m];niT+=h[S.plan][i]*frac(S.m);}for(const i of EXPI){ni-=h.a[i][S.m];niT-=h[S.plan][i]*frac(S.m);}
-  $('hVerdict').innerHTML=vb('รายได้รวม',o.r)+vb('ค่าใช้จ่ายรวม',o.e)+
+  $('hVerdict').innerHTML=vb('รายได้รวม',o.r,'REV')+vb('ค่าใช้จ่ายรวม',o.e,'EXP')+
     `<div class="vbox"><div class="v1">ภาพรวมแผน</div><div class="v2 ${o.st==='pass'?'t-pass':'t-high'}">${o.st==='pass'?'ผ่าน':'ไม่ผ่าน'}</div><span style="font-size:13px;color:var(--ink2)">รายได้หักค่าใช้จ่าย (ทุกหมวด) ${fM(ni)} ลบ. (แผน ${fM(niT)})</span></div>`;
   // lines
   baseOpts();
   const ms=D.months.slice(0,S.m+1);
   const line=(id,key,color)=>{const act=ms.map((_,i)=>amt(h,key,i).A/1e6);const P=amt(h,key).P;const tgt=ms.map(m=>P*m.n/12/1e6);
     mkChart(id,{type:'line',data:{labels:ms.map(m=>m.short),datasets:[{label:'ผลจริงสะสม',data:act,borderColor:color,backgroundColor:color,tension:.2,pointRadius:3},
-      {label:'เป้าหมายสะสม',data:tgt,borderColor:css('--ink2'),borderDash:[5,4],pointRadius:0,borderWidth:1.5}]},
+      {label:'เป้าหมายสะสม',data:tgt,borderColor:css('--ink2'),borderDash:[5,4],pointRadius:0,borderWidth:1.5},
+      ...(S.medOn?[{label:'มัธยฐานกลุ่ม (ผลจริงสะสม)',data:medSeries(peers(h),key,null,ms),borderColor:'#7A4FBF',backgroundColor:'#7A4FBF',borderWidth:2,pointRadius:3,pointStyle:'rectRot',tension:.2}]:[])]},
       options:{maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${f1(c.raw)} ลบ.`,afterBody:it=>{const a=it[0].dataIndex;const d=tgt[a]?(act[a]-tgt[a])/tgt[a]*100:null;return d===null?'':`คลาดเคลื่อน ${fP(d)}`;}}}},
       scales:{y:{title:{display:true,text:'ล้านบาท'}}}}});};
   document.querySelectorAll('.basisnote').forEach(e=>e.textContent=S.basis==='assess'?'(คิดเฉพาะหมวดที่นำมาประเมิน)':'(คิดทุกหมวด)');
   line('chRevLine','REV',css('--rev'));line('chExpLine','EXP',css('--exp'));
   dpLegend();
-  const block=(side,tot,title)=>{const idx=side==='rev'?REVI:EXPI;let s=dpHead('หมวด')+dpRow(title,S.basis==='assess'?'เฉพาะหมวดที่ประเมิน':'ทุกหมวด',evalv(h,tot),'total');
-    for(const i of idx){const v=evalv(h,CAT[i].id);const muted=!CAT[i].assess||(v.st==='none');s+=expRow(h,CAT[i].id,`${CAT[i].id} ${esc(CAT[i].name)}`,CAT[i].assess?'':notAssessTxt(CAT[i]),v,muted?'muted':'');}
+  const P=S.medOn?peers(h):null;if(P)renderMedInfo(h);['dpRev','dpExp'].forEach(i=>$(i).classList.toggle('med',!!P));const MC=k=>P?medCat(P,k):undefined;
+  const block=(side,tot,title)=>{const idx=side==='rev'?REVI:EXPI;let s=dpHead('หมวด',!!P)+dpRow(title,S.basis==='assess'?'เฉพาะหมวดที่ประเมิน':'ทุกหมวด',evalv(h,tot),'total',MC(tot));
+    for(const i of idx){const v=evalv(h,CAT[i].id);const muted=!CAT[i].assess||(v.st==='none');s+=expRow(h,CAT[i].id,`${CAT[i].id} ${esc(CAT[i].name)}`,CAT[i].assess?'':notAssessTxt(CAT[i]),v,muted?'muted':'',MC(CAT[i].id));}
     return s;};
   $('dpRev').innerHTML=block('rev','REV','รวมรายได้');$('dpExp').innerHTML=block('exp','EXP','รวมค่าใช้จ่าย');
 }
@@ -632,29 +719,53 @@ function renderT4(){renderCat('exp');drawSubCharts();}
 function render(){
   const m=D.months[S.m];
   $('hdrsub').textContent=`ปีงบประมาณ ${D.fy} ข้อมูลสะสม ${m.n} เดือน ถึง ${m.fname} เทียบ${S.plan==='p2'?'แผนปรับกลางปี':'แผนต้นปี'} กลุ่มเปรียบเทียบ ${group().length} แห่ง`;
-  if(S.tab===1)renderT1();else if(S.tab===2)renderT2();else if(S.tab===3)renderT3();else renderT4();
+  if(S.tab===1)renderT1();else if(S.tab===2)renderT2();else if(S.tab===3)renderT3();else if(S.tab===4)renderT4();else renderT5();
   drawSubCharts();
   $('footnote').innerHTML=`เป้าหมายสะสม = แผนประมาณการทั้งปี × ${m.n}/12 และ % คลาดเคลื่อน = (ผลจริงสะสม − เป้าหมายสะสม) ÷ เป้าหมายสะสม
   ผลจริงคำนวณจากงบทดลองสะสม (ยอดคงเหลือ Dr−Cr) จับคู่ผังบัญชีกับหมวด Planfin ตามตาราง AccCode ส่วนแผนมาจาก hig_est_current ที่ รพ. บันทึกรายบัญชี
-  ${S.basis==='assess'?'ยอดรวมใช้เฉพาะหมวดที่ประเมิน (ไม่รวมรายได้/ค่าใช้จ่ายที่ระบบบันทึกอัตโนมัติ รายได้งบลงทุน และค่าเสื่อมราคา) ตามนิยาม P291/P292'+(m.n<12?' และในเดือนที่ 1–11 ไม่นำ P04 รายได้ UC มาคิดในฝั่งรายได้':''):'ยอดรวมใช้ทุกหมวด ตามนิยาม P13S/P26S'}
+  ${S.basis==='assess'?'ยอดรวมใช้เฉพาะหมวดที่ประเมิน (ไม่รวมรายได้/ค่าใช้จ่ายที่ระบบบันทึกอัตโนมัติ รายได้งบลงทุน และค่าเสื่อมราคา) ตามนิยาม P291/P292'+(m.n<12?(S.incP04?' และเลือกนับ P04 รายได้ UC รวมในฝั่งรายได้':' และในเดือนที่ 1–11 ไม่นำ P04 รายได้ UC มาคิดในฝั่งรายได้'):''):'ยอดรวมใช้ทุกหมวด ตามนิยาม P13S/P26S'}
   หมวดที่มีผลจริงแต่ไม่ได้ทำแผนนับเป็นไม่ผ่าน ส่วนหมวดที่ไม่มีทั้งแผนและผลไม่นำมาคิดร้อยละ
   ที่มาข้อมูล ${esc(D.src)} และกลุ่มบริการ ปีงบ 2569 (กบรส. มี.ค. 2569)`;
 }
+const T5G=[{k:'both',t:'ผ่านทั้งแผนรับและแผนจ่าย',c:'var(--pass)'},{k:'rev',t:'ผ่านเฉพาะแผนรับ',c:'var(--rev)'},{k:'exp',t:'ผ่านเฉพาะแผนจ่าย',c:'var(--exp)'},{k:'none',t:'ไม่ผ่านทั้งแผนรับและแผนจ่าย',c:'var(--high)'}];
+function t5class(o){const r=o.r.st==='pass',e=o.e.st==='pass';return r&&e?'both':r?'rev':e?'exp':'none';}
+function t5data(){const G=group();const q=S.t5q;
+  const R=G.map(h=>{const o=overall(h);return{h,o,g:t5class(o)};});
+  const F=R.filter(x=>!q||x.h.code.includes(q)||x.h.name.includes(q)||x.h.prov.includes(q));
+  return{R,F};}
+function renderT5(){
+  const {R,F}=t5data();const N=R.length;const m=D.months[S.m];
+  $('t5sub').textContent=`${N} แห่งในกลุ่มเปรียบเทียบ ข้อมูลสะสม ${m.n} เดือน (ถึง ${m.fname}) ผ่านเกณฑ์เมื่อยอดรวม${S.basis==='assess'?'เฉพาะหมวดที่ประเมิน':'ทุกหมวด'}คลาดไม่เกิน ±${S.thr}%`+(m.n<12?(S.incP04?' ฝั่งรายได้นับรวม P04 รายได้ UC':' ฝั่งรายได้ไม่นับ P04 รายได้ UC'):'')+' หน่วยล้านบาท';
+  $('t5cards').innerHTML=T5G.map(g=>{const n=R.filter(x=>x.g===g.k).length;return `<div class="panel kpi t5card${S.t5grp===g.k?' on':''}" style="--c:${g.c}" data-g="${g.k}" role="button" tabindex="0"><div class="lab">${g.t}</div><div class="big">${N?f1(pct(n,N)):'–'}%<small>${n} จาก ${N} แห่ง</small></div></div>`;}).join('');
+  const show=S.t5grp==='all'?T5G:T5G.filter(g=>g.k===S.t5grp);
+  $('t5lists').innerHTML=show.map(g=>{const L=pinFocus(F.filter(x=>x.g===g.k).sort((a,b)=>a.h.prov.localeCompare(b.h.prov,'th')||a.h.code.localeCompare(b.h.code)),x=>x.h);
+    return `<div class="panel t5list" style="--c:${g.c}"><h2>${g.t}<span class="cnt">${L.length}</span></h2>`+(L.length?`<div class="tbl"><table><thead><tr><th class="l">รหัส</th><th class="l">โรงพยาบาล</th><th class="l">จังหวัด</th><th class="l">กลุ่มบริการ</th><th>เป้ารายได้</th><th>รายได้จริง</th><th>% คลาด รายได้</th><th>เป้าค่าใช้จ่าย</th><th>ค่าใช้จ่ายจริง</th><th>% คลาด ค่าใช้จ่าย</th></tr></thead><tbody>`+
+      L.map(x=>`<tr class="${x.h.code===S.focus?'focus':''}"><td class="l">${x.h.code}</td><td class="l clickable" data-h="${x.h.code}"><u>${esc(short(x.h.name))}</u></td><td class="l">${esc(x.h.prov)}</td><td class="l">${esc(x.h.grp)}</td><td>${fM(x.o.r.T)}</td><td>${fM(x.o.r.A)}</td><td class="t-${x.o.r.st}">${fP(x.o.r.dev)}</td><td>${fM(x.o.e.T)}</td><td>${fM(x.o.e.A)}</td><td class="t-${x.o.e.st}">${fP(x.o.e.dev)}</td></tr>`).join('')+'</tbody></table></div>':'<div class="empty">ไม่มีโรงพยาบาลในกลุ่มนี้</div>')+'</div>';}).join('');
+}
+$('t5cards').addEventListener('click',e=>{const c=e.target.closest('[data-g]');if(!c)return;S.t5grp=S.t5grp===c.dataset.g?'all':c.dataset.g;$('selT5').value=S.t5grp;renderT5();});
+$('t5lists').addEventListener('click',e=>{const td=e.target.closest('[data-h]');if(td){S.hosp=td.dataset.h;goTab(2);window.scrollTo({top:0});}});
 initControls();render();
 
 /* ---------- export (Excel / PDF) ---------- */
-const r2=v=>Math.round(v/1e4)/100, r1=v=>v===null?null:Math.round(v*10)/10;
+const r2=v=>v===null||v===undefined?null:Math.round(v/1e4)/100, r1=v=>v===null?null:Math.round(v*10)/10;
 function mark(v,assessed){if(v.st==='none')return'–';if(!assessed)return'ไม่ประเมิน';return v.st==='pass'?'ผ่าน':'ไม่ผ่าน';}
 function critText(){return S.dir==='two'?`อยู่ในช่วง ±${S.thr}% ของเป้าหมาย`:`รายได้ไม่ต่ำกว่าเป้าเกิน ${S.thr}% ค่าใช้จ่ายไม่เกินเป้าเกิน ${S.thr}%`;}
 function metaLines(){const m=D.months[S.m];const G=group();
   const flt=S.mode==='pick'?`เลือก รพ. เอง ${G.length} แห่ง`:[S.prov||'ทุกจังหวัด',S.size||'ทุกขนาด',S.grp||'ทุกกลุ่มบริการ'].join(' / ')+` (${G.length} แห่ง)`;
   return[`ปีงบประมาณ ${D.fy} ข้อมูลสะสม ${m.n} เดือน ถึง ${m.fname} เทียบ${S.plan==='p2'?'แผนปรับกลางปี':'แผนต้นปี'}`,
-    `กลุ่มเปรียบเทียบ: ${flt}`,`เกณฑ์ผ่าน: ${critText()} ยอดรวม${S.basis==='assess'?'เฉพาะหมวดที่ประเมิน (P291/P292)'+(m.n<12?' ไม่รวม P04 รายได้ UC ในเดือนที่ 1–11':''):'ทุกหมวด (P13S/P26S)'} หน่วยเงิน: ล้านบาท`];}
+    `กลุ่มเปรียบเทียบ: ${flt}`,`เกณฑ์ผ่าน: ${critText()} ยอดรวม${S.basis==='assess'?'เฉพาะหมวดที่ประเมิน (P291/P292)'+(m.n<12?(S.incP04?' นับรวม P04 รายได้ UC':' ไม่รวม P04 รายได้ UC ในเดือนที่ 1–11'):''):'ทุกหมวด (P13S/P26S)'} หน่วยเงิน: ล้านบาท`];}
 const VH=['เป้าหมายสะสม','ผลจริงสะสม','% คลาดเคลื่อน','ต่างจากเป้า','สถานะ','ผลประเมิน'];
 const vcols=(v,assessed)=>[r2(v.T),r2(v.A),trunc2(v.dev),r2(v.A-v.T),LBL[v.st],mark(v,assessed)];
 function sortedAcc(h,cid){const L=accList(h,cid);const t=evalv(h,cid);const dir=(t.A-t.T)>=0?-1:1;return L.sort((p,q)=>dir*((p.v.A-p.v.T)-(q.v.A-q.v.T)));}
 function buildExport(tab){
   const m=D.months[S.m];const sheets=[];
+  if(tab===5){const {R,F}=t5data();const N=R.length;
+    sheets.push({name:'สรุป',head:['กลุ่มผลลัพธ์','จำนวน (แห่ง)','ทั้งหมด (แห่ง)','ร้อยละ'],rows:T5G.map(g=>{const n=R.filter(x=>x.g===g.k).length;return[g.t,n,N,r1(pct(n,N))];})});
+    const show=S.t5grp==='all'?T5G:T5G.filter(g=>g.k===S.t5grp);
+    for(const g of show){const L=F.filter(x=>x.g===g.k).sort((a,b)=>a.h.prov.localeCompare(b.h.prov,'th')||a.h.code.localeCompare(b.h.code));
+      sheets.push({name:g.t,head:['รหัส','โรงพยาบาล','จังหวัด','กลุ่มบริการ','เป้ารายได้','รายได้จริง','% คลาด รายได้','เป้าค่าใช้จ่าย','ค่าใช้จ่ายจริง','% คลาด ค่าใช้จ่าย'],
+        rows:L.map(x=>[x.h.code,x.h.name,x.h.prov,x.h.grp,r2(x.o.r.T),r2(x.o.r.A),trunc2(x.o.r.dev),r2(x.o.e.T),r2(x.o.e.A),trunc2(x.o.e.dev)])});}
+    return{title:'สรุปกลุ่มผลลัพธ์ของแผน Planfin',file:`planfin_กลุ่มผลลัพธ์_${m.short}`,sheets};}
   if(tab===1){
     const G=group();const R=pinFocus(G.map(h=>({h,...overall(h)})).sort((a,b)=>a.h.code.localeCompare(b.h.code)),x=>x.h);
     const N=R.length,c=f=>R.filter(f).length;
@@ -668,21 +779,21 @@ function buildExport(tab){
   }
   if(tab===2){
     const h=HB[S.hosp];if(!h)return null;
-    const rows=[],acc=[];
+    const rows=[],acc=[];const P=S.medOn?peers(h):null;const MX=v=>P?[v]:[];
     for(const side of['rev','exp']){const tot=side==='rev'?'REV':'EXP';
-      rows.push({c:'tot',r:[side==='rev'?'รวมรายได้':'รวมค่าใช้จ่าย','',...vcols(evalv(h,tot),true)]});
+      rows.push({c:'tot',r:[side==='rev'?'รวมรายได้':'รวมค่าใช้จ่าย','',...vcols(evalv(h,tot),true),...MX(P&&r2(medCat(P,tot)))]});
       for(const i of(side==='rev'?REVI:EXPI)){const c=CAT[i];const v=evalv(h,c.id);
-        rows.push({c:'cat',r:[`${c.id} ${c.name}`,c.assess?'':notAssessTxt(c),...vcols(v,c.assess)]});
-        for(const x of sortedAcc(h,c.id)){const row=[`${c.id} ${c.name}`,x.a.c,x.a.n,...vcols(x.v,c.assess)];acc.push(row);rows.push({c:'acc',r:[x.a.n,x.v.T<0||x.v.A<0?'บัญชีรายการหัก':'',...vcols(x.v,c.assess)]});}}}
-    sheets.push({name:'รายหมวดและบัญชีย่อย',head:['หมวด / บัญชี','หมายเหตุ',...VH],rows:rows.map(x=>x.r),cls:rows.map(x=>x.c)});
-    sheets.push({name:'บัญชีย่อย',head:['หมวด','รหัสบัญชี','ชื่อบัญชี',...VH],rows:acc,pdf:false});
+        rows.push({c:'cat',r:[`${c.id} ${c.name}`,c.assess?'':notAssessTxt(c),...vcols(v,c.assess),...MX(P&&r2(medCat(P,c.id)))]});
+        const ci=CAT.indexOf(c);for(const x of sortedAcc(h,c.id)){const md=P?r2(medAcc(P,ci,x.ai)):null;const row=[`${c.id} ${c.name}`,x.a.c,x.a.n,...vcols(x.v,c.assess),...MX(md)];acc.push(row);rows.push({c:'acc',r:[x.a.n,x.v.T<0||x.v.A<0?'บัญชีรายการหัก':'',...vcols(x.v,c.assess),...MX(md)]});}}}
+    sheets.push({name:'รายหมวดและบัญชีย่อย',head:['หมวด / บัญชี','หมายเหตุ',...VH,...MX('มัธยฐานกลุ่ม (ผลจริงสะสม)')],rows:rows.map(x=>x.r),cls:rows.map(x=>x.c)});
+    sheets.push({name:'บัญชีย่อย',head:['หมวด','รหัสบัญชี','ชื่อบัญชี',...VH,...MX('มัธยฐานกลุ่ม (ผลจริงสะสม)')],rows:acc,pdf:false});
     const ms=D.months.slice(0,S.m+1);const mh=['หมวด','รายการ',...ms.map(x=>x.short)];const mr=[];
     for(const key of['REV','EXP',...CAT.map(c=>c.id)]){const nm=key==='REV'?'รวมรายได้':key==='EXP'?'รวมค่าใช้จ่าย':`${key} ${CAT.find(c=>c.id===key).name}`;
       const A=ms.map((_,i)=>amt(h,key,i).A),P=amt(h,key).P;
       mr.push([nm,'ผลจริงสะสม',...A.map(r2)]);mr.push([nm,'เป้าหมายสะสม',...ms.map(x=>r2(P*x.n/12))]);
       mr.push([nm,'ผลจริงรายเดือน',...A.map((a,i)=>r2(i?a-A[i-1]:a))]);mr.push([nm,'เป้าต่อเดือน',...ms.map(()=>r2(P/12))]);}
     sheets.push({name:'รายเดือน',head:mh,rows:mr,pdf:false});
-    return{title:`Planfin ${h.code} ${h.name}`,sub:`${h.prov} ${h.type} ${h.lvl} กลุ่มบริการ ${h.grp}`,file:`planfin_${h.code}_${m.short}`,sheets};
+    return{title:`Planfin ${h.code} ${h.name}`,sub:`${h.prov} ${h.type} ${h.lvl} กลุ่มบริการ ${h.grp} ประชากร UC ${h.pop?h.pop.toLocaleString('th-TH'):'–'}${P?` | มัธยฐานเทียบกับ ${medDesc(h,P)}`:''}`,file:`planfin_${h.code}_${m.short}`,sheets};
   }
   const isR=tab===3,key=isR?S.revCat:S.expCat,side=isR?'rev':'exp';
   const G=group();const assessed=key==='REV'||key==='EXP'||CAT.find(c=>c.id===key).assess;
@@ -710,7 +821,7 @@ function toXlsx(ex){
 function toPdf(ex){
   const cell=(v,j,head)=>{const hd=head[j];let cls=typeof v==='number'?'':'l';
     if(hd==='ผลประเมิน'||/^ผล(รายได้|ค่าใช้จ่าย)$|^ภาพรวม$/.test(hd))cls=v==='ผ่าน'?'ok':v==='ไม่ผ่าน'?'bad':'na';
-    const s=v===null||v===undefined?'–':typeof v!=='number'?esc(v):hd==='ร้อยละผ่าน'?f1(v)+'%':/%/.test(hd)?fP(v):hd==='ต่างจากเป้า'?(v>0?'+':'')+v.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}):/แห่ง/.test(hd)?String(v):v.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const s=v===null||v===undefined?'–':typeof v!=='number'?esc(v):/^ร้อยละ/.test(hd)?f1(v)+'%':/%/.test(hd)?fP(v):hd==='ต่างจากเป้า'?(v>0?'+':'')+v.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}):/แห่ง/.test(hd)?String(v):v.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
     return`<td class="${cls}">${s}</td>`;};
   let html=`<h1>${esc(ex.title)}</h1><div class="meta">${ex.sub?esc(ex.sub)+'<br>':''}${metaLines().map(esc).join('<br>')}</div>`;
   for(const s of ex.sheets){if(s.pdf===false)continue;
